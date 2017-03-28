@@ -39,7 +39,7 @@ func getPageSummary(url string) (openGraphProps, error) {
 	//you add it as a new key, so that the key is just `title`
 	//and not `og:title` (for example).
 
-	//HINTS: http://golang-examples.tumblr.com/post/47426518779/parse-html
+	//HINTS: https://info344-s17.github.io/tutorials/tokenizing/
 	//https://godoc.org/golang.org/x/net/html
 
 	return nil, nil
