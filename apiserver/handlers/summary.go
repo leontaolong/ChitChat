@@ -1,7 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
+	"strings"
+
+	"golang.org/x/net/html"
 )
 
 //openGraphPrefix is the prefix used for Open Graph meta properties
@@ -11,6 +15,66 @@ const openGraphPrefix = "og:"
 type openGraphProps map[string]string
 
 func getPageSummary(url string) (openGraphProps, error) {
+	//GET the URL
+	resp, err := http.Get(url)
+
+	//if there was an error, report it and exit
+	if err != nil {
+		// log.Fatalf("error fetching URL: %v\n", err)
+		return nil, err
+	}
+
+	//make sure the response body gets closed
+	defer resp.Body.Close()
+
+	//check response status code
+	if resp.StatusCode >= 400 {
+		// log.Fatalf("response status code was %d\n", resp.StatusCode)
+		return nil, errors.New("Response status was " + resp.Status)
+	}
+
+	//check response content type
+	ctype := resp.Header.Get("Content-Type")
+	if !strings.HasPrefix(ctype, "text/html") {
+		return nil, errors.New("response content type was " + ctype + " not text/htm")
+	}
+
+	ogProps := make(openGraphProps)
+
+	//create a new tokenizer over the response body
+	tokenizer := html.NewTokenizer(resp.Body)
+
+	//loop until we find the title element and its content
+	//or encounter an error (which includes the end of the file)
+	for {
+		//get the next token type
+		tokenType := tokenizer.Next()
+
+		//if it's an error token, we either reached
+		//the end of the file, or the HTML was malformed
+		if tokenType == html.ErrorToken {
+			// log.Fatalf("error tokenizing HTML: %v", tokenizer.Err())
+			return nil, tokenizer.Err()
+		}
+
+		//if this is a start tag token...
+		if tokenType == html.StartTagToken {
+			//get the token
+			token := tokenizer.Token()
+			//if the name of the element is "title"
+			if "title" == token.Data {
+				//the next token should be the page title
+				tokenType = tokenizer.Next()
+				//just make sure it's actually a text token
+				if tokenType == html.TextToken {
+					//report the page title and break out of the loop
+					// fmt.Println(tokenizer.Token().Data)
+
+					break
+				}
+			}
+		}
+	}
 	//Get the URL
 	//If there was an error, return it
 
