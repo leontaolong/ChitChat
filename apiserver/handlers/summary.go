@@ -18,7 +18,7 @@ func getPageSummary(url string) (openGraphProps, error) {
 	//GET the URL
 	resp, err := http.Get(url)
 
-	//if there was an error, report it and exit
+	//if there waspwd an error, report it and exit
 	if err != nil {
 		// log.Fatalf("error fetching URL: %v\n", err)
 		return nil, err
@@ -67,7 +67,7 @@ func getPageSummary(url string) (openGraphProps, error) {
 				tokenType = tokenizer.Next()
 				//just make sure it's actually a text token
 				if tokenType == html.TextToken {
-					//report the page title and break out of the loop
+					// report the page title and break out of the loop
 					// fmt.Println(tokenizer.Token().Data)
 
 					break
@@ -114,6 +114,20 @@ func getPageSummary(url string) (openGraphProps, error) {
 //summary information about the returned page and sends those summary properties
 //to the client as a JSON-encoded object.
 func SummaryHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json; charset=utf-8")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	URL := r.FormValue("url")
+
+	if URL == "" {
+		http.Error(w, "Bad Request, no parameter key 'url' found", http.StatusBadRequest)
+	}
+
+	openGraphMapm, err := getPageSummary(URL)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	// URL = r.URL.Query().Get("url")
 	//Add the following header to the response
 	//   Access-Control-Allow-Origin: *
 	//this will allow JavaScript served from other origins
