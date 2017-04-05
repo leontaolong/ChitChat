@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -16,9 +17,9 @@ const openGraphPrefix = "og:"
 //openGraphProps represents a map of open graph property names and values
 type openGraphProps map[string]string
 
-func getPageSummary(url string) (openGraphProps, error) {
+func getPageSummary(URL string) (openGraphProps, error) {
 	//GET the URL
-	resp, err := http.Get(url)
+	resp, err := http.Get(URL)
 
 	//if there was an error, return it
 	if err != nil {
@@ -70,16 +71,50 @@ func getPageSummary(url string) (openGraphProps, error) {
 			if "meta" == token.Data {
 				var prop string
 				var content string
-				for i := 0; i < len(token.Attr); i++ {
-					switch token.Attr[i].Key {
+				var name string
+				for _, attr := range token.Attr {
+					switch attr.Key {
 					case "property":
-						prop = token.Attr[i].Val
+						prop = attr.Val
 					case "content":
-						content = token.Attr[i].Val
+						content = attr.Val
+					case "name":
+						name = attr.Val
 					}
 					if prop != "" && content != "" {
 						trimedProp := strings.TrimPrefix(prop, openGraphPrefix)
 						ogProps[trimedProp] = content
+					}
+					// fallback to using the content attribute within the
+					// <meta name="description" content="..."> element.
+					if _, ok := ogProps["description"]; ok && name == "description" {
+						ogProps["description"] = content
+					}
+				}
+			}
+			// fallback to using the text content within the <title> element
+			if _, ok := ogProps["title"]; ok && "title" == token.Data {
+				ogProps["title"] = tokenizer.Token().Data
+			}
+			// fallback to using the href attribute within
+			// the <link rel="icon" href="..."> element.
+			// for this implementation, it only works with absolute url path
+			if _, ok := ogProps["image"]; ok && "link" == token.Data {
+				var ref string
+				var href string
+				for _, attr := range token.Attr {
+					switch attr.Key {
+					case "ref":
+						ref = attr.Val
+					case "href":
+						href = attr.Val
+					}
+				}
+				if ref == "icon" && href != "" {
+					// check if the url is a parsable absolute path
+					_, err := url.ParseRequestURI(href)
+					if err == nil {
+						ogProps["image"] = href
 					}
 				}
 			}
