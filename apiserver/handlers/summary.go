@@ -81,15 +81,15 @@ func getPageSummary(URL string) (openGraphProps, error) {
 					case "name":
 						name = attr.Val
 					}
-					if prop != "" && content != "" {
-						trimedProp := strings.TrimPrefix(prop, openGraphPrefix)
-						ogProps[trimedProp] = content
-					}
-					// fallback to using the content attribute within the
-					// <meta name="description" content="..."> element.
-					if _, ok := ogProps["description"]; ok && name == "description" {
-						ogProps["description"] = content
-					}
+				}
+				if prop != "" && content != "" {
+					trimedProp := strings.TrimPrefix(prop, openGraphPrefix)
+					ogProps[trimedProp] = content
+				}
+				// fallback to using the content attribute within the
+				// <meta name="description" content="..."> element.
+				if _, ok := ogProps["description"]; ok && name == "description" && content != "" {
+					ogProps["description"] = content
 				}
 			}
 			// fallback to using the text content within the <title> element
