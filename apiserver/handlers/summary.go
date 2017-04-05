@@ -63,9 +63,9 @@ func getPageSummary(url string) (openGraphProps, error) {
 			token := tokenizer.Token()
 			// if the name of the token is meta
 			if "meta" == token.Data {
+				var prop string
+				var content string
 				for i := 0; i < len(token.Attr); i++ {
-					var prop string
-					var content string
 					switch token.Attr[i].Key {
 					case "property":
 						prop = token.Attr[i].Val
@@ -123,19 +123,15 @@ func SummaryHandler(w http.ResponseWriter, r *http.Request) {
 
 	if URL == "" {
 		http.Error(w, "Bad Request, no parameter key 'url' found", http.StatusBadRequest)
-		return
 	}
 
 	openGraphMap, err := getPageSummary(URL)
 	if err != nil && err != io.EOF {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
 	}
-
 	encoder := json.NewEncoder(w)
 	if err := encoder.Encode(openGraphMap); err != nil {
 		http.Error(w, "error encoding json: "+err.Error(), http.StatusInternalServerError)
-		return
 	}
 
 	// URL = r.URL.Query().Get("url")
