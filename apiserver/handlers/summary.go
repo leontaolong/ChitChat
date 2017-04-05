@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strings"
 
@@ -29,7 +31,6 @@ func getPageSummary(url string) (openGraphProps, error) {
 
 	//check response status code
 	if resp.StatusCode >= 400 {
-		// log.Fatalf("response status code was %d\n", resp.StatusCode)
 		return nil, errors.New("Response status was " + resp.Status)
 	}
 
@@ -53,24 +54,28 @@ func getPageSummary(url string) (openGraphProps, error) {
 		//if it's an error token, we either reached
 		//the end of the file, or the HTML was malformed
 		if tokenType == html.ErrorToken {
-			// log.Fatalf("error tokenizing HTML: %v", tokenizer.Err())
-			return nil, tokenizer.Err()
+			return ogProps, tokenizer.Err()
 		}
 
-		//if this is a start tag token...
-		if tokenType == html.StartTagToken {
+		//if this is a start tag or self closing tag token...
+		if tokenType == html.StartTagToken || tokenType == html.SelfClosingTagToken {
 			//get the token
 			token := tokenizer.Token()
-			//if the name of the element is "title"
-			if "title" == token.Data {
-				//the next token should be the page title
-				tokenType = tokenizer.Next()
-				//just make sure it's actually a text token
-				if tokenType == html.TextToken {
-					// report the page title and break out of the loop
-					// fmt.Println(tokenizer.Token().Data)
-
-					break
+			// if the name of the token is meta
+			if "meta" == token.Data {
+				for i := 0; i < len(token.Attr); i++ {
+					var prop string
+					var content string
+					switch token.Attr[i].Key {
+					case "property":
+						prop = token.Attr[i].Val
+					case "content":
+						content = token.Attr[i].Val
+					}
+					if prop != "" && content != "" {
+						trimedProp := strings.TrimPrefix(prop, openGraphPrefix)
+						ogProps[trimedProp] = content
+					}
 				}
 			}
 		}
@@ -105,9 +110,6 @@ func getPageSummary(url string) (openGraphProps, error) {
 
 	//HINTS: https://info344-s17.github.io/tutorials/tokenizing/
 	//https://godoc.org/golang.org/x/net/html
-
-	return nil, nil
-
 }
 
 //SummaryHandler fetches the URL in the `url` query string parameter, extracts
@@ -121,12 +123,21 @@ func SummaryHandler(w http.ResponseWriter, r *http.Request) {
 
 	if URL == "" {
 		http.Error(w, "Bad Request, no parameter key 'url' found", http.StatusBadRequest)
+		return
 	}
 
-	openGraphMapm, err := getPageSummary(URL)
-	if err != nil {
+	openGraphMap, err := getPageSummary(URL)
+	if err != nil && err != io.EOF {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
+
+	encoder := json.NewEncoder(w)
+	if err := encoder.Encode(openGraphMap); err != nil {
+		http.Error(w, "error encoding json: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	// URL = r.URL.Query().Get("url")
 	//Add the following header to the response
 	//   Access-Control-Allow-Origin: *
@@ -155,5 +166,4 @@ func SummaryHandler(w http.ResponseWriter, r *http.Request) {
 	//you write the JSON-encoded object:
 	//   Content-Type: application/json; charset=utf-8
 	//this tells the client that you are sending it JSON
-
 }
