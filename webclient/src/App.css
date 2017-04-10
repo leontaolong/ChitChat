@@ -22,3 +22,16 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+
+::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color:   #ccc;
+}
+
+.mdl-layout__header-row {
+  padding-left: 25px;
+}
+
+.mdl-layout__title, .mdl-layout-title {
+  font-size: 16px;
+}
