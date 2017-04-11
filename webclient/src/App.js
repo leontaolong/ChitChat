@@ -4,21 +4,27 @@ import './App.css';
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { "data": '', "err": '' };
+    this.state = { data: '', requestErr: '', fetchErr: '' };
+    this.updateUrl = this.updateUrl.bind(this);
   }
 
-  getData(url) {
-    fetch(url) //download the data
-      .then(function (res) {
-        if (res.status !== 200) {
-          this.setState("err", res.status);
-        } else {
-          this.setState("data", res.json());
-        }
-      })
-      .catch(function (err) {
-        this.setState("err", "Fetch error")
-      });
+  updateUrl(url) {
+      this.setState({ data: '', requestErr: '', fetchErr: '' });
+      var that = this;
+      var ReqUrl = "http://138.197.197.54/v1/summary?url=" + url;
+      fetch(ReqUrl) //download the data
+        .then(function (res) {
+          if (!res.ok) {
+            that.setState({ requestErr: res.status + ": " + res.statusText });
+          }
+          return res.json();
+        })
+        .then(function (data) {
+          that.setState({ data: data });
+        })
+        .catch(function (err) {
+          that.setState({ fetchErr: err.message });
+        });
   }
 
   render() {
@@ -29,10 +35,12 @@ class App extends Component {
             <div className="mdl-layout__header-row">
               <span className="mdl-layout-title">Open Graph Explorer</span>
               <div className="mdl-layout-spacer"></div>
-              <Search updateUrlCallbk={this.getData} />
-              <Content contentData={this.state.data} />
+              <Search updateUrlCallbk={this.updateUrl} />
             </div>
           </header>
+          {this.state.requestErr !== '' && <h3 style={{ "color": "red" }}>Request Error: {this.state.requestErr}</h3>}
+          {this.state.fetchErr !== '' && <h3 style={{ "color": "red" }}>Fetch Error: {this.state.fetchErr}</h3>}
+          {this.state.data !== '' && <Content data={this.state.data} />}
         </div>
       </div>
     );
@@ -62,9 +70,10 @@ class Search extends Component {
   }
 
   handleSearchClicked(event) {
-    // event.preventDefault();
-    console.log("searched: " + this.state.searchValue);
-    this.props.updateUrl(this.state.searchValue);
+    if (this.state.searchValue !== '') {
+      console.log("searched: " + this.state.searchValue);
+      this.props.updateUrlCallbk(this.state.searchValue);
+    }
   }
 
   render() {
@@ -76,7 +85,6 @@ class Search extends Component {
           </label>
           <div className="mdl-textfield__expandable-holder">
             <input className="mdl-textfield__input" type="url" onChange={this.handleChange} onKeyDown={this.handleEnter} id="sample6" placeholder="search for website url" />
-            {/*<label className="mdl-textfield__label" >Expandable Input</label>*/}
           </div>
         </div>
       </div>
@@ -87,9 +95,53 @@ class Search extends Component {
 class Content extends Component {
   constructor(props) {
     super(props);
+    this.state = {};
+    this.updateState = this.updateState.bind(this);
   }
+
+  componentDidMount() {
+    this.updateState();
+  }
+
+  updateState() {
+    // set default state first
+    this.setState({
+      title: "unknown",
+      description: "unknown",
+      image: "http://americanrv.com/sites/default/files/default_images/image-unavailable.jpg"
+    });
+    // overide state if necessary
+    this.setState(this.props.data);
+  }
+
+  componentWillReceiveProps(prevProps, prevState) {
+    this.updateState();
+  }
+
   render() {
-    return null;
+    console.log(this.state);
+    var contentNode = [];
+
+    for (let i = 0; i < Object.keys(this.state).length; i++) {
+      var prop = Object.keys(this.state)[i];
+      var val = this.state[prop];
+      contentNode.push(<ContentNode prop={prop} val={val} key={prop} />);
+    }
+    return (
+      <div>{contentNode}</div>
+    );
+  }
+}
+
+class ContentNode extends Component {
+  render() {
+    return (
+      <div>
+        <h3>{this.props.prop}</h3>
+        {this.props.prop == "image" && <img src={this.props.val} />}
+        {this.props.prop !== "image" && <div>{this.props.val}</div>}
+      </div>
+    );
   }
 }
 export default App;
