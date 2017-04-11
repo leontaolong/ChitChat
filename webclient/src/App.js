@@ -8,9 +8,12 @@ class App extends Component {
     this.updateUrl = this.updateUrl.bind(this);
   }
 
+  // update the user-put url and fectch the Open Graph props from the server
   updateUrl(url) {
+      // clean up the current state
       this.setState({ data: '', requestErr: '', fetchErr: '' });
       var that = this;
+      
       var ReqUrl = "http://138.197.197.54/v1/summary?url=" + url;
       fetch(ReqUrl) //download the data
         .then(function (res) {
@@ -70,10 +73,8 @@ class Search extends Component {
   }
 
   handleSearchClicked(event) {
-    if (this.state.searchValue !== '') {
-      console.log("searched: " + this.state.searchValue);
+    if (this.state.searchValue !== '') 
       this.props.updateUrlCallbk(this.state.searchValue);
-    }
   }
 
   render() {
@@ -103,30 +104,31 @@ class Content extends Component {
     this.updateState();
   }
 
+  componentWillReceiveProps(prevProps, prevState) {
+    this.updateState();
+  }
+
   updateState() {
     // set default state first
     this.setState({
       title: "unknown",
       description: "unknown",
+      // iamge placeholder
       image: "http://americanrv.com/sites/default/files/default_images/image-unavailable.jpg"
     });
     // overide state if necessary
     this.setState(this.props.data);
   }
 
-  componentWillReceiveProps(prevProps, prevState) {
-    this.updateState();
-  }
-
   render() {
-    console.log(this.state);
     var contentNode = [];
-
+    // construct <Contentnode /> array with props and vals
     for (let i = 0; i < Object.keys(this.state).length; i++) {
       var prop = Object.keys(this.state)[i];
       var val = this.state[prop];
       contentNode.push(<ContentNode prop={prop} val={val} key={prop} />);
     }
+
     return (
       <div>{contentNode}</div>
     );
@@ -134,7 +136,7 @@ class Content extends Component {
 }
 
 class ContentNode extends Component {
-  render() {
+  render() {  // render each Open Graph prop-val node
     return (
       <div>
         <h3>{this.props.prop}</h3>
@@ -144,4 +146,5 @@ class ContentNode extends Component {
     );
   }
 }
+
 export default App;
