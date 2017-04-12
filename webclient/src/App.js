@@ -13,17 +13,19 @@ class App extends Component {
       // clean up the current state
       this.setState({ data: '', requestErr: '', fetchErr: '' });
       var that = this;
-      
+
       var ReqUrl = "http://138.197.197.54/v1/summary?url=" + url;
       fetch(ReqUrl) //download the data
         .then(function (res) {
           if (!res.ok) {
             that.setState({ requestErr: res.status + ": " + res.statusText });
+            return;
           }
           return res.json();
         })
         .then(function (data) {
-          that.setState({ data: data });
+          if (typeof data === 'object')
+            that.setState({ data: data });
         })
         .catch(function (err) {
           that.setState({ fetchErr: err.message });
@@ -140,7 +142,7 @@ class ContentNode extends Component {
     return (
       <div>
         <h3>{this.props.prop}</h3>
-        {this.props.prop == "image" && <img src={this.props.val} />}
+        {this.props.prop === "image" && <img alt="open graph of the website" src={this.props.val} />}
         {this.props.prop !== "image" && <div>{this.props.val}</div>}
       </div>
     );
