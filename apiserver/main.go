@@ -23,11 +23,12 @@ func main() {
 	// HOST - host address to respond to (if not set, leave empty, which means any host)
 	port := os.Getenv("PORT")
 	host := os.Getenv("HOST")
-	addr := fmt.Sprintf("%s:%s", host, port)
 
 	if port == "" {
 		port = defaultPort
 	}
+
+	addr := fmt.Sprintf("%s:%s", host, port)
 
 	tlsKeyPath := os.Getenv("TLSKEY")
 	tlsCertPath := os.Getenv("TLSCERT")
@@ -36,7 +37,7 @@ func main() {
 
 	//add handlers.SummaryHandler function as a handler
 	//for the apiSummary route
-	http.HandleFunc("/v1/summary", handlers.SummaryHandler)
+	http.HandleFunc(apiSummary, handlers.SummaryHandler)
 
 	//start your web server and use log.Fatal() to log
 	//any errors that occur if the server can't start

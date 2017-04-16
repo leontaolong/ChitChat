@@ -1,5 +1,5 @@
 FROM scratch
 COPY ./ca-certificates.crt /etc/ssl/certs/
 ADD ./apiserver apiserver
-EXPOSE 80
+EXPOSE 443
 ENTRYPOINT ["/apiserver"]
