@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-const defaultPort = "80"
+const defaultPort = "443" //default port for https
 
 const (
 	apiRoot    = "/v1/"
@@ -23,12 +23,16 @@ func main() {
 	// HOST - host address to respond to (if not set, leave empty, which means any host)
 	port := os.Getenv("PORT")
 	host := os.Getenv("HOST")
+	addr := fmt.Sprintf("%s:%s", host, port)
 
 	if port == "" {
 		port = defaultPort
 	}
 
-	fmt.Printf("server is listening at %s...\n", host+":"+port)
+	tlsKeyPath := os.Getenv("TLSKEY")
+	tlsCertPath := os.Getenv("TLSCERT")
+
+	fmt.Printf("server is listening at %s...\n", addr)
 
 	//add handlers.SummaryHandler function as a handler
 	//for the apiSummary route
@@ -36,5 +40,5 @@ func main() {
 
 	//start your web server and use log.Fatal() to log
 	//any errors that occur if the server can't start
-	log.Fatal(http.ListenAndServe(host+":"+port, nil))
+	log.Fatal(http.ListenAndServeTLS(addr, tlsCertPath, tlsKeyPath, nil))
 }
