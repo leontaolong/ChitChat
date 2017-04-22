@@ -2,6 +2,7 @@
   "name": "webclient",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://leontaolong.me",
   "dependencies": {
     "react": "^15.5.3",
     "react-dom": "^15.5.3"

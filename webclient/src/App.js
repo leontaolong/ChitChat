@@ -14,7 +14,7 @@ class App extends Component {
       this.setState({ data: '', requestErr: '', fetchErr: '' });
       var that = this;
 
-      var ReqUrl = "http://138.197.197.54/v1/summary?url=" + url;
+      var ReqUrl = "https://api.leontaolong.me/v1/summary?url=" + url;
       fetch(ReqUrl) //download the data
         .then(function (res) {
           if (!res.ok) {
@@ -116,7 +116,7 @@ class Content extends Component {
       title: "unknown",
       description: "unknown",
       // iamge placeholder
-      image: "http://americanrv.com/sites/default/files/default_images/image-unavailable.jpg"
+      image: "https://americanrv.com/sites/default/files/default_images/image-unavailable.jpg"
     });
     // overide state if necessary
     this.setState(this.props.data);
