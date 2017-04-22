@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"crypto/hmac"
 	"crypto/sha256"
 	"errors"
 )
@@ -22,6 +23,15 @@ var ErrInvalidID = errors.New("Invalid Session ID")
 //if there was an error generating random bytes for the session ID
 func NewSessionID(signingKey string) (SessionID, error) {
 	//make a byte slice of length `signedLength`
+	v := []byte(value)
+	h := hmac.New(sha256.New, []byte(key))
+	h.Write(v)
+	sig := h.Sum(nil)
+
+	buf := make([]byte, len(v)+len(sig))
+	copy(buf, v)
+	//copy sig into last part of buf
+	copy(buf[len(v):], sig)
 
 	//use the crypto/rand package to read `idLength`
 	//random bytes into the first part of that byte slice
