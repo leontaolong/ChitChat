@@ -34,7 +34,7 @@ func NewSessionID(signingKey string) (SessionID, error) {
 	sessionID := make([]byte, idLength)
 	_, err := rand.Read(sessionID)
 	if err != nil {
-		return InvalidSessionID, error.New("Error generating random bytes: " + err)
+		return InvalidSessionID, error.New("Error generating random bytes: " + err.Error)
 	}
 	copy(resultByte, sessionID)
 
@@ -61,7 +61,7 @@ func ValidateID(id string, signingKey string) (SessionID, error) {
 	//if you get an error, return InvalidSessionID and the error
 	buf, err := base64.URLEncoding.DecodeString(id)
 	if err != nil {
-		return InvalidSessionID, errors.New("Error decoding: " + err)
+		return InvalidSessionID, errors.New("Error decoding: " + err.Error)
 	}
 
 	//if the byte slice length is < signedLength
