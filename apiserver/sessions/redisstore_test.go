@@ -33,7 +33,6 @@ func TestRedisStore(t *testing.T) {
 		Addr: redisAddr,
 	})
 	redisStore := NewRedisStore(client, -1)
-
 	state1 := &State{
 		Requests: 100,
 	}

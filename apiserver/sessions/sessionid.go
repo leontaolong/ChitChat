@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 )
 
@@ -34,7 +35,7 @@ func NewSessionID(signingKey string) (SessionID, error) {
 	sessionID := make([]byte, idLength)
 	_, err := rand.Read(sessionID)
 	if err != nil {
-		return InvalidSessionID, error.New("Error generating random bytes: " + err.Error)
+		return InvalidSessionID, errors.New("error generating random bytes: " + err.Error())
 	}
 	copy(resultByte, sessionID)
 
@@ -46,7 +47,7 @@ func NewSessionID(signingKey string) (SessionID, error) {
 	h.Write(sessionID)
 	sig := h.Sum(nil)
 
-	copy((resultByte[len(v):], sig)
+	copy(resultByte[len(sessionID):], sig)
 	//use the encoding/base64 package to encode the
 	//byte slice into a base64.URLEncoding
 	//and return the result as a new SessionID
@@ -61,13 +62,13 @@ func ValidateID(id string, signingKey string) (SessionID, error) {
 	//if you get an error, return InvalidSessionID and the error
 	buf, err := base64.URLEncoding.DecodeString(id)
 	if err != nil {
-		return InvalidSessionID, errors.New("Error decoding: " + err.Error)
+		return InvalidSessionID, errors.New("error decoding: " + err.Error())
 	}
 
 	//if the byte slice length is < signedLength
 	//it must be invalid, so return InvalidSessionID
 	//and ErrInvalidID
-	if (len(buf) < signedLength) {
+	if len(buf) < signedLength {
 		return InvalidSessionID, ErrInvalidID
 	}
 
@@ -77,20 +78,18 @@ func ValidateID(id string, signingKey string) (SessionID, error) {
 	//use hmac.Equal() to compare the two MACs
 	//if they are not equal, return InvalidSessionID
 	//and ErrInvalidID
-	sessionId := buf[:len(buf) - idLength]
-	sig := buf[len(buf) - idLength:]
+	sessionID := buf[:len(buf)-idLength]
+	sig := buf[len(buf)-idLength:]
 
 	h := hmac.New(sha256.New, []byte(signingKey))
-	h.Write(sessionId)
+	h.Write(sessionID)
 	sig2 := h.Sum(nil)
-	if (!hmac.Equal(sig, sig2)) {
+	if !hmac.Equal(sig, sig2) {
 		return InvalidSessionID, ErrInvalidID
-	} else {
-		//the session ID is valid, so return it as a SessionID
-		//with nil for the error
-		return SessionID(id), nil
 	}
-
+	//the session ID is valid, so return it as a SessionID
+	//with nil for the error
+	return SessionID(id), nil
 }
 
 //String returns a string representation of the sessionID

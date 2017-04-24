@@ -1,10 +1,12 @@
 package sessions
 
 import (
+	"encoding/json"
 	"time"
 
-	redis "gopkg.in/redis.v5"
 	"errors"
+
+	redis "gopkg.in/redis.v5"
 )
 
 //redisKeyPrefix is the prefix we will use for keys
@@ -32,7 +34,7 @@ func NewRedisStore(client *redis.Client, sessionDuration time.Duration) *RedisSt
 	//i.e., Addr is "127.0.0.1"
 	if client == nil {
 		client = redis.NewClient(&redis.Options{
-			Addr: "127.0.0.1"
+			Addr: "127.0.0.1",
 		})
 	}
 
@@ -44,7 +46,10 @@ func NewRedisStore(client *redis.Client, sessionDuration time.Duration) *RedisSt
 
 	//return a new RedisStore with the Client field set to `client`
 	//and the SessionDuration field set to `sessionDuration`
-	return RedisStore{client, sessionDuration}
+	return &RedisStore{
+		Client:          client,
+		SessionDuration: sessionDuration,
+	}
 }
 
 //Store implementation
@@ -52,9 +57,9 @@ func NewRedisStore(client *redis.Client, sessionDuration time.Duration) *RedisSt
 //Save associates the provided `state` data with the provided `sid` in the store.
 func (rs *RedisStore) Save(sid SessionID, state interface{}) error {
 	//encode the `state` into JSON
-	jbuf, err = json.Marshal(state)
+	jbuf, err := json.Marshal(state)
 	if err != nil {
-		return errors.New("error marshalling json: "+err.Error())
+		return errors.New("error marshalling json: " + err.Error())
 	}
 
 	//use the redis client's Set() method, using `sid.getRedisKey()`
@@ -78,22 +83,22 @@ func (rs *RedisStore) Get(sid SessionID, state interface{}) error {
 	//return ErrStateNotFound if the error == redis.Nil
 	//otherwise return the error
 	if err != nil {
-		if (err != redis.Nil)
-			return errors.New("error getting from cache: "+err.Error())
-		else
-			return ErrStateNotFound
+		if err != redis.Nil {
+			return errors.New("error getting from cache: " + err.Error())
+		}
+		return ErrStateNotFound
 	}
 
 	//get the returned bytes and Unmarshal them into
 	//the `state` parameter
 	//if you get an error, return it
 	if err := json.Unmarshal(jbuf, state); err != nil {
-        return errors.New("error unmarshalling json: "+err.Error())
-    }
+		return errors.New("error unmarshalling json: " + err.Error())
+	}
 
 	//use the .Expire() command to reset the expiry duration
 	//to the store's session duration
-	state.Expire(rs.SessionDuration)
+	rs.Client.Expire(sid.getRedisKey(), rs.SessionDuration)
 
 	//for EXTRA CREDIT use the Pipeline feature
 	//to do the .Get() and .Expire() commands
