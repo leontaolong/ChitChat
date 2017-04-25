@@ -32,12 +32,6 @@ func (ms *MongoStore) GetAll() ([]*User, error) {
 
 //GetByID returns the User with the given ID
 func (ms *MongoStore) GetByID(id UserID) (*User, error) {
-	// src := []byte(string(id))
-	// encodedStr := hex.EncodeToString(src)
-	// usrID := bson.ObjectIdHex(encodedStr)
-	// if sID, ok := id.(string); ok {
-	// 	id = bson.ObjectIdHex(sID)
-	// }
 	usr := &User{}
 	err := ms.Session.DB(ms.DatabaseName).C(ms.CollectionName).FindId(id).One(usr)
 	return usr, err

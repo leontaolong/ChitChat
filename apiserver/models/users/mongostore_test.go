@@ -88,5 +88,6 @@ func TestMongoStore(t *testing.T) {
 	if u.LastName != "UPDATED Tester" {
 		t.Errorf("FirstName field not updated: expected `UPDATED Tester` but got `%s`\n", u.LastName)
 	}
+
 	sess.DB(store.DatabaseName).C(store.CollectionName).RemoveAll(nil)
 }
