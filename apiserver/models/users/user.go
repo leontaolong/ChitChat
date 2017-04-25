@@ -102,8 +102,8 @@ func (nu *NewUser) ToUser() (*User, error) {
 		PhotoURL:  photoURL,
 	}
 
-	//call the User's SetPassword() method to set the password,
-	//which will hash the plaintext password
+	// call the User's SetPassword() method to set the password,
+	// which will hash the plaintext password
 	err := usr.SetPassword(nu.Password)
 	if err != nil {
 		return nil, err
