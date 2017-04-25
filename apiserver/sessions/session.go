@@ -36,7 +36,6 @@ func BeginSession(signingKey string, store Store, state interface{}, w http.Resp
 	//  Authorization: Bearer <sid>
 	//where <sid> is the new SessionID
 	w.Header().Add(headerAuthorization, schemeBearer+sid.String())
-
 	//return the new SessionID and nil
 	return sid, nil
 }
