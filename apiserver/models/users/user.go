@@ -104,8 +104,10 @@ func (nu *NewUser) ToUser() (*User, error) {
 
 	//call the User's SetPassword() method to set the password,
 	//which will hash the plaintext password
-	usr.SetPassword(nu.Password)
-
+	err := usr.SetPassword(nu.Password)
+	if err != nil {
+		return nil, err
+	}
 	//return the User and nil
 	return usr, nil
 }
