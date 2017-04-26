@@ -74,10 +74,6 @@ func main() {
 
 	fmt.Printf("server is listening at %s...\n", addr)
 
-	//add handlers.SummaryHandler function as a handler
-	//for the apiSummary route
-	http.HandleFunc(apiSummary, handlers.SummaryHandler)
-
 	//start your web server and use log.Fatal() to log
 	//any errors that occur if the server can't start
 	log.Fatal(http.ListenAndServeTLS(addr, tlsCertPath, tlsKeyPath, mux))
