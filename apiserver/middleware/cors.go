@@ -63,7 +63,6 @@ func CORS(origins, methods, allowHeaders, exposeHeaders string) Adapter {
 				//else, call the ServeHTTP() method on `handler`
 				handler.ServeHTTP(w, r)
 			}
-
 		})
 	}
 }
