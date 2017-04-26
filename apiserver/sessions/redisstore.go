@@ -34,7 +34,7 @@ func NewRedisStore(client *redis.Client, sessionDuration time.Duration) *RedisSt
 	//i.e., Addr is "127.0.0.1"
 	if client == nil {
 		client = redis.NewClient(&redis.Options{
-			Addr: "127.0.0.1",
+			Addr: "127.0.0.1:6379",
 		})
 	}
 

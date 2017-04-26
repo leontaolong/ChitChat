@@ -60,7 +60,7 @@ func testSummaryCase(t *testing.T, c *summaryTestCase, wg *sync.WaitGroup) {
 func TestSummary(t *testing.T) {
 	cases := []summaryTestCase{
 		summaryTestCase{
-			url:         "http://ogp.me/",
+			url:         "https://ogp.me/",
 			title:       "Open Graph protocol",
 			description: "The Open Graph protocol enables any web page to become a rich object in a social graph.",
 			imageURL:    "http://ogp.me/logo.png",
@@ -106,7 +106,7 @@ func TestNoURL(t *testing.T) {
 func TestBadURL(t *testing.T) {
 	handler := http.HandlerFunc(SummaryHandler)
 	resRec := httptest.NewRecorder()
-	req, err := http.NewRequest("GET", "/summary?url=http://www.example.com/invalidpath", nil)
+	req, err := http.NewRequest("GET", "/summary?url=https://www.example.com/invalidpath", nil)
 	if nil != err {
 		t.Fatal(err)
 	}
