@@ -59,13 +59,13 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/v1/users", ctx.UsersHandler)
-	mux.HandleFunc("/v1/sessions", ctx.SessionsHandler)
-	mux.HandleFunc("/v1/sessions/mine", ctx.SessionsMineHandler)
-	mux.HandleFunc("/v1/users/me", ctx.UsersMeHandler)
-	mux.HandleFunc(apiSummary, handlers.SummaryHandler)
-
-	http.Handle(apiRoot, middleware.Adapt(mux, middleware.CORS("", "", "", "")))
+	muxCors := http.NewServeMux()
+	mux.Handle(apiRoot, middleware.Adapt(muxCors, middleware.CORS("", "", "", "")))
+	muxCors.HandleFunc("/v1/users", ctx.UsersHandler)
+	muxCors.HandleFunc("/v1/sessions", ctx.SessionsHandler)
+	muxCors.HandleFunc("/v1/sessions/mine", ctx.SessionsMineHandler)
+	muxCors.HandleFunc("/v1/users/me", ctx.UsersMeHandler)
+	muxCors.HandleFunc(apiSummary, handlers.SummaryHandler)
 
 	addr := fmt.Sprintf("%s:%s", host, port)
 

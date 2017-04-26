@@ -1,6 +1,8 @@
 package middleware
 
-import "net/http"
+import (
+	"net/http"
+)
 
 const (
 	//DefaultCORSOrigins are the default allowed origins
@@ -53,7 +55,6 @@ func CORS(origins, methods, allowHeaders, exposeHeaders string) Adapter {
 			w.Header().Add(headerAccessControlAllowMethods, methods)
 			w.Header().Add(headerAccessControlAllowHeaders, allowHeaders)
 			w.Header().Add(headerAccessControlExposeHeaders, exposeHeaders)
-
 			//if the request method is OPTIONS, this is a pre-flight
 			//CORS request to see if the real request should be allowed
 			//so simply respond with no body and http.StatusOK
