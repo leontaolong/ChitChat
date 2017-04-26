@@ -87,7 +87,7 @@ func (nu *NewUser) ToUser() (*User, error) {
 	//https://www.gravatar.com/avatar/ + hex-encoded md5 has of email
 	h := md5.New()
 	io.WriteString(h, nu.Email)
-	src := []byte(h.Sum(nil))
+	src := h.Sum(nil)
 	dst := make([]byte, hex.EncodedLen(len(src)))
 	hex.Encode(dst, src)
 	photoURL := gravatarBasePhotoURL + string(dst)
