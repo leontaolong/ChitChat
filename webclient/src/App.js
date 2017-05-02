@@ -44,6 +44,7 @@ class App extends Component {
           <div>
             <Route exact path="/" component={SignIn} />
             <Route path="/signin" component={SignIn} />
+            <Route path="/signup" component={SignUp} />
           </div>
       </Router>
       </div>
@@ -58,7 +59,6 @@ class Header extends Component {
           <header className="mdl-layout__header">
             <div className="mdl-layout__header-row">
               <span className="mdl-layout-title">Open Graph Explorer</span>
-              <div className="mdl-layout-spacer"></div>
             </div>
           </header>
          </div>

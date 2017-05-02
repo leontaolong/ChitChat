@@ -139,7 +139,7 @@ class SignIn extends Component {
       )
     } else {*/
       return (
-          <div className="mdl-layout mdl-js-layout mdl-color--grey-100 main">
+          <div className="mdl-layout mdl-js-layout mdl-color--grey-100">
             <main className="mdl-layout__content">
               <div className="mdl-card mdl-shadow--6dp">
                 <div className="mdl-card__title mdl-color--primary mdl-color-text--white">
@@ -153,7 +153,7 @@ class SignIn extends Component {
                 </div>
                 <div className="mdl-card__actions mdl-card--border">
                   <button className="mdl-button mdl-js-button mdl-button--primary" disabled={!signInEnabled} onClick={(e) => this.signIn(e)}>Sign-in</button> <br />
-                  <div className="toSignUpPrompt">Don't have an account? <Link className="toSignUpLink"to="/signin">Sign Up</Link></div>
+                  <div className="toSignUpPrompt">Don't have an account? <Link className="toSignUpLink"to="/signup">Sign Up</Link></div>
                 </div>
               </div>
             </main>
@@ -163,7 +163,7 @@ class SignIn extends Component {
 }
 //A component that displays an input form with validation styling
 //props are: field, type, label, changeCallback, errors
-class ValidatedInput extends React.Component {
+export class ValidatedInput extends React.Component {
   render() {
     return (
       <div className="mdl-textfield mdl-js-textfield">
@@ -175,7 +175,7 @@ class ValidatedInput extends React.Component {
   }
 }
 //a component to represent and display validation errors
-class ValidationErrors extends React.Component {
+export class ValidationErrors extends React.Component {
   render() {
     return (
       <div>
