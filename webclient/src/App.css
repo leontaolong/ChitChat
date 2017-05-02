@@ -28,3 +28,17 @@
 .mdl-card {
   margin:auto;
 }
+
+.toSignUpPrompt {
+  margin-top: 20px;
+  margin-bottom: 5px;
+  color:#999;
+}
+
+.toSignUpLink {
+  color: #999;
+}
+
+.toSignUpLink:hover, .toSignUpLink:hover:focus {
+  color: #3d4fb0;
+}
