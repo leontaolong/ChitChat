@@ -5,7 +5,8 @@
   "homepage": "",
   "dependencies": {
     "react": "^15.5.3",
-    "react-dom": "^15.5.3"
+    "react-dom": "^15.5.3",
+    "react-router": "^4.1.1"
   },
   "devDependencies": {
     "react-scripts": "0.9.5"
