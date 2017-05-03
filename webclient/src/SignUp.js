@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import {ValidatedInput, ValidationErrors} from './SignIn';
+import {ValidatedInput} from './SignIn';
 
 /**
  * A form for signing up and logging into a website.
@@ -38,7 +38,33 @@ class SignUp extends React.Component {
   //handle signUp button
   signUp(event) {
     event.preventDefault(); //don't submit
-    this.signUpUser(this.state.email, this.state.password, this.state.username, this.state.firstName, this.state.LastName);
+    //default base API URL to production
+    //replace `your-domain.com` with your domain name
+    var apiURL = "https://api.leontaolong.me/v1/";
+
+    //if our site is being served from localhost,
+    //or the loop-back address, switch the base API URL
+    //to localhost as well
+    // if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    //     apiURL = "https://localhost:4000/v1/"
+    // };
+
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    var request = new Request(apiURL + "users", { method: 'POST',
+               headers: myHeaders,
+               body: JSON.stringify(this.state),
+               mode: 'cors',
+               cache: 'default' });
+
+    fetch(request)
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(j) {
+      console.log(j);
+    });
   }
 
   //A callback function for registering new users
@@ -47,19 +73,6 @@ class SignUp extends React.Component {
     var thisComponent = this;
     thisComponent.setState({ visible: !thisComponent.state.visible });
     
-    var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    var myInit = { method: 'POST',
-               headers: myHeaders,
-               mode: 'cors',
-               cache: 'default' };
-
-    fetch('flowers.jpg', myInit).then(function(response) {
-    return response.blob();
-    }).then(function(myBlob) {
-    var objectURL = URL.createObjectURL(myBlob);
-    });
     // firebase.auth().createUserWithEmailAndPassword(email, password)
     //   .then((firebaseUser) => {
     //     firebaseUser.sendEmailVerification();
@@ -221,7 +234,7 @@ class SignUp extends React.Component {
 
             <ValidatedInput field="lastName" type="text" label="Last Name" changeCallback={this.handleChange} errors={lastNameErrors} />
 
-            <ValidatedInput field="password" type="password" label="Password" changeCallback={this.handleChange} errors={firstNameErrors} />
+            <ValidatedInput field="password" type="password" label="Password" changeCallback={this.handleChange} errors={passwordErrors} />
 
             <ValidatedInput field="passwordConf" type="password" label="Password Confirm" changeCallback={this.handleChange} errors={passwordConfirmationErrors} />
 
