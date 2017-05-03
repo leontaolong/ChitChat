@@ -3,7 +3,7 @@ import './App.css';
 import SignIn from './SignIn';
 import SignUp from './SignUp';
 import Profile from './Profile';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Route } from 'react-router-dom'
 
 class App extends Component {
   // constructor(props) {

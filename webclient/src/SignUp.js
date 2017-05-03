@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {Link} from 'react-router-dom';
 import {ValidatedInput, ValidationErrors} from './SignIn';
 
@@ -14,9 +14,10 @@ class SignUp extends React.Component {
     this.state = {
       'email': undefined,
       'password': undefined,
-      'name': undefined,
-      'passwordConfirm': undefined,
-      'visible': false
+      'userName': undefined,
+      'firstName': undefined,
+      'lastName': undefined,
+      'passwordConf': undefined
     };
 
     //function binding
@@ -37,14 +38,28 @@ class SignUp extends React.Component {
   //handle signUp button
   signUp(event) {
     event.preventDefault(); //don't submit
-    this.signUpUser(this.state.email, this.state.password, this.state.name);
+    this.signUpUser(this.state.email, this.state.password, this.state.username, this.state.firstName, this.state.LastName);
   }
 
   //A callback function for registering new users
-  signUpUser(email, password, handle) {
+  signUpUser(email, password, handle, firstName, lastName) {
     /* Create a new user and save their information */
     var thisComponent = this;
     thisComponent.setState({ visible: !thisComponent.state.visible });
+    
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    var myInit = { method: 'POST',
+               headers: myHeaders,
+               mode: 'cors',
+               cache: 'default' };
+
+    fetch('flowers.jpg', myInit).then(function(response) {
+    return response.blob();
+    }).then(function(myBlob) {
+    var objectURL = URL.createObjectURL(myBlob);
+    });
     // firebase.auth().createUserWithEmailAndPassword(email, password)
     //   .then((firebaseUser) => {
     //     firebaseUser.sendEmailVerification();
@@ -66,6 +81,7 @@ class SignUp extends React.Component {
     //   })
     //   .then(function () { if (firebase.auth().currentUser) hashHistory.push('/home') });
   }
+
   //handle signIn button
   signIn(event) {
     event.preventDefault(); //don't submit
@@ -129,10 +145,12 @@ class SignUp extends React.Component {
     //field validation
     var emailErrors = this.validate(this.state.email, { required: true, email: true });
     var passwordErrors = this.validate(this.state.password, { required: true, minLength: 6 });
-    var handleErrors = this.validate(this.state.name, { required: true });
-    var passwordConfirmationErrors = this.validate(this.state.password, { required: true, toBeMatched: this.state.passwordConfirm })
+    var handleErrors = this.validate(this.state.userName, { required: true });
+    var passwordConfirmationErrors = this.validate(this.state.password, { required: true, toBeMatched: this.state.passwordConf})
+    var lastNameErrors = this.validate(this.state.lastName, { required: true });
+    var firstNameErrors = this.validate(this.state.firstName, { required: true });
     //button validation
-    var signUpEnabled = (emailErrors.isValid && passwordErrors.isValid && handleErrors.isValid && passwordConfirmationErrors.isValid);
+    var signUpEnabled = (emailErrors.isValid && passwordErrors.isValid && handleErrors.isValid && passwordConfirmationErrors.isValid && firstNameErrors.isValid && lastNameErrors.isValid);
     // var signInEnabled = (emailErrors.isValid && passwordErrors.isValid && passwordConfirmationErrors.isValid);
     /*if (this.state.visible) {
       return (
@@ -155,7 +173,7 @@ class SignUp extends React.Component {
 
             <div className="form-group sign-up-buttons">
               <button className="btn btn-primary" disabled={!signUpEnabled} onClick={(e) => this.signUp(e)}>Sign-up</button> <br />
-              <div>Already have an account? <Link to="/login">Sign In</Link></div>
+              <div>Already have an account? <Link to="/signin">Sign In</Link></div>
             </div>
           </form>
         </div>
@@ -168,9 +186,9 @@ class SignUp extends React.Component {
         <div className="container">
           <div id="space">
           </div>
-          <Alert bsStyle="warning">
+          <div bsStyle="warning">
             <strong>{this.state.error}</strong>
-          </Alert>
+          </div>
           <form role="form" className="sign-up-form">
 
             <ValidatedInput field="email" type="email" label="Your Email Address" changeCallback={this.handleChange} errors={emailErrors} />
@@ -183,40 +201,39 @@ class SignUp extends React.Component {
 
             <div className="form-group sign-up-buttons">
               <button className="btn btn-primary" disabled={!signUpEnabled} onClick={(e) => this.signUp(e)}>Sign-up</button>
-              <div>Already have an account? <Link to="/login">Sign In</Link></div>
+              <div>Already have an account? <Link to="/signin">Sign In</Link></div>
             </div>
           </form>
         </div>
       );
     } else {*/
       return (
-        <div className="mdl-layout mdl-js-layout mdl-color--grey-100">
-            <main className="mdl-layout__content">
-              <div className="mdl-card mdl-shadow--6dp">
-                <div className="mdl-card__title mdl-color--primary mdl-color-text--white">
-                  <h2 className="mdl-card__title-text">Sign In</h2>
-                </div>
-                <div className="mdl-card__supporting-text">
-                  <form action="#">
+        <div className="container">
+          <div id="space">
+          </div>
+          <form role="form" className="sign-up-form">
+
             <ValidatedInput field="email" type="email" label="Your Email Address" changeCallback={this.handleChange} errors={emailErrors} />
 
-            <ValidatedInput field="name" type="text" label="Your Name" changeCallback={this.handleChange} errors={handleErrors} />
+            <ValidatedInput field="userName" type="text" label="Username" changeCallback={this.handleChange} errors={handleErrors} />
 
-            <ValidatedInput field="password" type="password" label="Password" changeCallback={this.handleChange} errors={passwordErrors} />
+            <ValidatedInput field="firstName" type="text" label="First Name" changeCallback={this.handleChange} errors={firstNameErrors} />
 
-            <ValidatedInput field="passwordConfirm" type="password" label="Password Confirm" changeCallback={this.handleChange} errors={passwordConfirmationErrors} />
-                  </form>
-                </div>
-            <div className="mdl-card__actions mdl-card--border">
-              <button className="mdl-button mdl-js-button mdl-button--primary" disabled={!signUpEnabled} onClick={(e) => this.signUp(e)}>Sign-up</button> <br />
-              <div className="toSignUpPrompt"> Already have an account? <Link className="toSignUpLink" to="/signin">Sign In</Link> </div>
+            <ValidatedInput field="lastName" type="text" label="Last Name" changeCallback={this.handleChange} errors={lastNameErrors} />
+
+            <ValidatedInput field="password" type="password" label="Password" changeCallback={this.handleChange} errors={firstNameErrors} />
+
+            <ValidatedInput field="passwordConf" type="password" label="Password Confirm" changeCallback={this.handleChange} errors={passwordConfirmationErrors} />
+
+            <div className="form-group sign-up-buttons">
+              <button className="btn btn-primary" disabled={!signUpEnabled} onClick={(e) => this.signUp(e)}>Sign-up</button> <br />
+              <div className="signInUpLink"> Already have an account? <Link to="/signin">Sign In</Link> </div>
             </div>
-
-              </div>
-            </main>
-          </div>
+          </form>
+        </div>
       );
   }
 }
+
 
 export default SignUp;

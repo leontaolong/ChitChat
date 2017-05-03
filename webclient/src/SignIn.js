@@ -1,15 +1,14 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {Link} from 'react-router-dom'
 
-class SignIn extends Component {
+class SignIn extends React.Component {
 
   constructor(props) {
     super(props);
 
     this.state = {
       'email': undefined,
-      'password': undefined,
-      'visible': false
+      'password': undefined
     };
 
     //function binding
@@ -96,7 +95,7 @@ class SignIn extends Component {
     var passwordErrors = this.validate(this.state.password, { required: true, minLength: 6 });
     //button validation
     var signInEnabled = (emailErrors.isValid && passwordErrors.isValid);
-    /*if (this.state.visible) {
+    if (this.state.visible) {
       return (
         <div className="container">
           <div id="space">
@@ -112,7 +111,7 @@ class SignIn extends Component {
 
             <div className="form-group sign-up-buttons">
               <button className="btn btn-primary" disabled={!signInEnabled} onClick={(e) => this.signIn(e)}>Sign-in</button> <br />
-              <div className="signInUpLink">Don't have an account? <Link to="/signin">Sign Up</Link> </div>
+              <div className="signInUpLink">Don't have an account? <Link to="/signup">Sign Up</Link> </div>
             </div>
           </form>
         </div>
@@ -132,43 +131,40 @@ class SignIn extends Component {
             <ValidatedInput field="password" type="password" label="Password" changeCallback={this.handleChange} errors={passwordErrors} />
             <div className="form-group sign-up-buttons">
               <button className="btn btn-primary" disabled={!signInEnabled} onClick={(e) => this.signIn(e)}>Sign-in</button>
-              Don't have an account? <Link to="/siginin"><button className="btn btn-primary">Sign Up</button></Link>
+              Don't have an account? <Link to="/signup"><button className="btn btn-primary">Sign Up</button></Link>
             </div>
           </form>
         </div>
       )
-    } else {*/
+    } else {
       return (
-          <div className="mdl-layout mdl-js-layout mdl-color--grey-100">
-            <main className="mdl-layout__content">
-              <div className="mdl-card mdl-shadow--6dp">
-                <div className="mdl-card__title mdl-color--primary mdl-color-text--white">
-                  <h2 className="mdl-card__title-text">Sign In</h2>
-                </div>
-                <div className="mdl-card__supporting-text">
-                  <form action="#">
-                    <ValidatedInput field="email" type="email" label="Your Email Address" changeCallback={this.handleChange} errors={emailErrors} />
-                    <ValidatedInput field="password" type="password" label="Password" changeCallback={this.handleChange} errors={passwordErrors} />
-                  </form>
-                </div>
-                <div className="mdl-card__actions mdl-card--border">
-                  <button className="mdl-button mdl-js-button mdl-button--primary" disabled={!signInEnabled} onClick={(e) => this.signIn(e)}>Sign-in</button> <br />
-                  <div className="toSignUpPrompt">Don't have an account? <Link className="toSignUpLink"to="/signup">Sign Up</Link></div>
-                </div>
-              </div>
-            </main>
+        <div className="container">
+          <div id="space">
           </div>
+          <form role="form" className="sign-up-form">
+            <ValidatedInput field="email" type="email" label="Your Email Address" changeCallback={this.handleChange} errors={emailErrors} />
+
+            <ValidatedInput field="password" type="password" label="Password" changeCallback={this.handleChange} errors={passwordErrors} />
+
+            <div className="form-group sign-up-buttons">
+              <button className="btn btn-primary" disabled={!signInEnabled} onClick={(e) => this.signIn(e)}>Sign-in</button> <br />
+              <div className="signInUpLink">Don't have an account? <Link to="/signup">Sign Up</Link></div>
+            </div>
+          </form>
+        </div>
       );
+    }
   }
 }
+
 //A component that displays an input form with validation styling
 //props are: field, type, label, changeCallback, errors
 export class ValidatedInput extends React.Component {
   render() {
     return (
-      <div className="mdl-textfield mdl-js-textfield">
-        <input className="mdl-textfield__input" aria-label="input" id={this.props.field} type={this.props.type} name={this.props.field} onChange={this.props.changeCallback} />
-        <label className="mdl-textfield__label" htmlFor={this.props.field}>{this.props.label}</label>
+      <div className={"form-group " + this.props.errors.style}>
+        <label htmlFor={this.props.field} className="control-label">{this.props.label}</label>
+        <input aria-label="input" id={this.props.field} type={this.props.type} name={this.props.field} className="form-control" onChange={this.props.changeCallback} />
         <ValidationErrors errors={this.props.errors} />
       </div>
     );
@@ -180,16 +176,16 @@ export class ValidationErrors extends React.Component {
     return (
       <div>
         {this.props.errors.required &&
-          <p className="mdl-textfield__error" >Required!</p>
+          <p className="help-block">Required!</p>
         }
         {this.props.errors.email &&
-          <p className="mdl-textfield__error">Not an email address!</p>
+          <p className="help-block">Not an email address!</p>
         }
         {this.props.errors.minLength &&
-          <p className="mdl-textfield__error">Must be at least {this.props.errors.minLength}characters.</p>
+          <p className="help-block">Must be at least {this.props.errors.minLength} characters.</p>
         }
         {this.props.errors.matches &&
-          <p className="mdl-textfield__error">Passwords doesn't match</p>
+          <p className="help-block">Passwords doesn't match</p>
         }
       </div>
     );
@@ -198,33 +194,3 @@ export class ValidationErrors extends React.Component {
 
 export default SignIn;
 
-
-
-
-
-
-
-          /*<div className="mdl-layout mdl-js-layout mdl-color--grey-100 main">
-            <main className="mdl-layout__content">
-              <div className="mdl-card mdl-shadow--6dp">
-                <div className="mdl-card__title mdl-color--primary mdl-color-text--white">
-                  <h2 className="mdl-card__title-text">Acme Co.</h2>
-                </div>
-                <div className="mdl-card__supporting-text">
-                  <form action="#">
-                    <div className="mdl-textfield mdl-js-textfield">
-                      <input className="mdl-textfield__input" type="text" id="username" />
-                      <label className="mdl-textfield__label" htmlFor="username">Username</label>
-                    </div>
-                    <div className="mdl-textfield mdl-js-textfield">
-                      <input className="mdl-textfield__input" type="password" id="userpass" />
-                      <label className="mdl-textfield__label" htmlFor="userpass">Password</label>
-                    </div>
-                  </form>
-                </div>
-                <div className="mdl-card__actions mdl-card--border">
-                  <button className="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Log in</button>
-                </div>
-              </div>
-            </main>
-          </div>*/
