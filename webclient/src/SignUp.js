@@ -18,12 +18,12 @@ class SignUp extends React.Component {
       'firstName': undefined,
       'lastName': undefined,
       'passwordConf': undefined,
-      'resErr': undefined
+      'resErr': undefined,
+      'fetchErr': undefined
     };
 
     //function binding
     this.handleChange = this.handleChange.bind(this);
-    this.signUpUser = this.signUpUser.bind(this);
   }
 
   //update state for specific field
@@ -40,9 +40,8 @@ class SignUp extends React.Component {
   signUp(event) {
     event.preventDefault(); //don't submit
     var thisComponent = this;
-    this.setState({resErr: undefined});
+    this.setState({resErr: undefined, fetchErr: undefined});
     //default base API URL to production
-    //replace `your-domain.com` with your domain name
     var apiURL = "https://api.leontaolong.me/v1/";
 
     // if our site is being served from localhost,
@@ -55,8 +54,9 @@ class SignUp extends React.Component {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
-    // delete resErr before handing this.state to the server as a json request
+    // delete resErr and fetchErr before handing this.state to the server as a json request
     delete this.state['resErr'];
+    delete this.state['fetchErr'];
     var request = new Request(apiURL + "users", { method: 'POST',
                headers: myHeaders,
                body: JSON.stringify(this.state),
@@ -78,37 +78,8 @@ class SignUp extends React.Component {
       console.log(j);
     })
     .catch(function (err) {
-      console.log(JSON.stringify(err));
+        this.setState({fetchErr : "Fetch Error: " + err});
     });
-  }
-
-
-  //A callback function for registering new users
-  signUpUser(email, password, handle, firstName, lastName) {
-    /* Create a new user and save their information */
-    var thisComponent = this;
-    thisComponent.setState({ visible: !thisComponent.state.visible });
-    
-    // firebase.auth().createUserWithEmailAndPassword(email, password)
-    //   .then((firebaseUser) => {
-    //     firebaseUser.sendEmailVerification();
-    //     thisComponent.setState({ visible: !thisComponent.state.visible });
-    //     var userData = {
-    //       displayName: handle
-    //     }
-
-    //     var profilePromise = firebaseUser.updateProfile(userData);
-
-    //     //add to the JITC 
-    //     //jsonObjectInTheCloud['users'].push(userData)
-    //     var newUserRef = firebase.database().ref('users/' + firebaseUser.uid);
-    //     newUserRef.set(userData);
-    //     return profilePromise;
-    //   })
-    //   .catch((error) => {
-    //     thisComponent.setState({ error: error.message, visible: !thisComponent.state.visible });
-    //   })
-    //   .then(function () { if (firebase.auth().currentUser) hashHistory.push('/home') });
   }
 
   //handle signIn button
@@ -240,12 +211,15 @@ class SignUp extends React.Component {
         <div className="container">
           <div id="space">
           </div>
+          {this.state.fetchErr !== undefined && 
+          <h4 style={{"color": "red"}}>{this.state.fetchErr}</h4>
+           }
           {this.state.resErr !== undefined && 
           <h4 style={{"color": "red"}}>{this.state.resErr}</h4>
            }
           <form role="form" className="sign-up-form">
 
-            <ValidatedInput field="email" type="email" label="Your Email Address" changeCallback={this.handleChange} errors={emailErrors} />
+            <ValidatedInput field="email" type="email" label="Email Address" changeCallback={this.handleChange} errors={emailErrors} />
 
             <ValidatedInput field="userName" type="text" label="Username" changeCallback={this.handleChange} errors={handleErrors} />
 
@@ -255,7 +229,7 @@ class SignUp extends React.Component {
 
             <ValidatedInput field="password" type="password" label="Password" changeCallback={this.handleChange} errors={passwordErrors} />
 
-            <ValidatedInput field="passwordConf" type="password" label="Password Confirm" changeCallback={this.handleChange} errors={passwordConfirmationErrors} />
+            <ValidatedInput field="passwordConf" type="password" label="Confirm Password" changeCallback={this.handleChange} errors={passwordConfirmationErrors} />
 
             <div className="form-group sign-up-buttons">
               <button className="btn btn-primary" disabled={!signUpEnabled} onClick={(e) => this.signUp(e)}>Sign-up</button> <br />
