@@ -17,7 +17,8 @@ class SignUp extends React.Component {
       'userName': undefined,
       'firstName': undefined,
       'lastName': undefined,
-      'passwordConf': undefined
+      'passwordConf': undefined,
+      'resErr': undefined
     };
 
     //function binding
@@ -38,6 +39,8 @@ class SignUp extends React.Component {
   //handle signUp button
   signUp(event) {
     event.preventDefault(); //don't submit
+    var thisComponent = this;
+    this.setState({resErr: undefined});
     //default base API URL to production
     //replace `your-domain.com` with your domain name
     var apiURL = "https://api.leontaolong.me/v1/";
@@ -52,6 +55,8 @@ class SignUp extends React.Component {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
+    // delete resErr before handing this.state to the server as a json request
+    delete this.state['resErr'];
     var request = new Request(apiURL + "users", { method: 'POST',
                headers: myHeaders,
                body: JSON.stringify(this.state),
@@ -60,12 +65,23 @@ class SignUp extends React.Component {
 
     fetch(request)
     .then(function(response) {
-      return response.json();
+      if (response.status >= 300) {
+        return response.text().then((err) => {
+          thisComponent.setState({ resErr: "Response Error: " + err });
+          Promise.reject(err)
+        });
+      } else {
+        return response.json();
+      }
     })
-    .then(function(j) {
+    .then(function(j) {   
       console.log(j);
+    })
+    .catch(function (err) {
+      console.log(JSON.stringify(err));
     });
   }
+
 
   //A callback function for registering new users
   signUpUser(email, password, handle, firstName, lastName) {
@@ -224,6 +240,9 @@ class SignUp extends React.Component {
         <div className="container">
           <div id="space">
           </div>
+          {this.state.resErr !== undefined && 
+          <h4 style={{"color": "red"}}>{this.state.resErr}</h4>
+           }
           <form role="form" className="sign-up-form">
 
             <ValidatedInput field="email" type="email" label="Your Email Address" changeCallback={this.handleChange} errors={emailErrors} />
