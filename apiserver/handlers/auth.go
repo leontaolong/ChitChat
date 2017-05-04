@@ -150,15 +150,6 @@ func (ctx *Context) UsersMeHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "error update task: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		// get newly updated state
-		state := &SessionState{}
-		_, err := sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
-		if err != nil {
-			http.Error(w, "error getting session state: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Add(headerContentType, contentTypeJSONUTF8)
-		encoder := json.NewEncoder(w)
-		encoder.Encode(state.User)
+		w.Write([]byte("update successful!"))
 	}
 }
