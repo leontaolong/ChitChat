@@ -6,11 +6,12 @@ import Profile from './Profile';
 import { BrowserRouter as Router, Route } from 'react-router-dom'
 
 class App extends Component {
-  // constructor(props) {
-  //   super(props);
-  //   this.state = { data: '', requestErr: '', fetchErr: '' };
-  //   this.updateUrl = this.updateUrl.bind(this);
-  // }
+  constructor(props) {
+    super(props);
+    this.state = {};
+    // this.updateUrl = this.updateUrl.bind(this);
+    this.updateUserInfo = this.updateUserInfo.bind(this);
+  }
 
   // // update the user-put url and fectch the Open Graph props from the server
   // updateUrl(url) {
@@ -35,6 +36,11 @@ class App extends Component {
   //         that.setState({ fetchErr: err.message });
   //       });
   // }
+
+  updateUserInfo(userInfo) {
+    console.log(userInfo);
+    this.setState(userInfo);
+  }
 
   render() {
     return (

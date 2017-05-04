@@ -1,5 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
+import {App} from './App';
 import {ValidatedInput} from './SignIn';
 
 /**
@@ -71,6 +72,8 @@ class SignUp extends React.Component {
           Promise.reject(err)
         });
       } else {
+        var authtoken = response.headers.get('authorization');
+        localStorage.setItem('authToken', authtoken);
         return response.json();
       }
     })
@@ -78,7 +81,7 @@ class SignUp extends React.Component {
       console.log(j);
     })
     .catch(function (err) {
-        this.setState({fetchErr : "Fetch Error: " + err});
+        thisComponent.setState({fetchErr : "Fetch Error: " + err});
     });
   }
 
@@ -151,72 +154,12 @@ class SignUp extends React.Component {
     var firstNameErrors = this.validate(this.state.firstName, { required: true });
     //button validation
     var signUpEnabled = (emailErrors.isValid && passwordErrors.isValid && handleErrors.isValid && passwordConfirmationErrors.isValid && firstNameErrors.isValid && lastNameErrors.isValid);
-    // var signInEnabled = (emailErrors.isValid && passwordErrors.isValid && passwordConfirmationErrors.isValid);
-    /*if (this.state.visible) {
-      return (
+    return (
         <div className="container">
           <div id="space">
           </div>
-          <div className="message">
-            <i className="fa fa-cog fa-spin fa-4x fa-fw"></i>
-            <span className="sr-only">Loading...</span>
-          </div>
-          <form role="form" className="sign-up-form">
-
-            <ValidatedInput field="email" type="email" label="Your Email Address" changeCallback={this.handleChange} errors={emailErrors} />
-
-            <ValidatedInput field="name" type="text" label="Your Name" changeCallback={this.handleChange} errors={handleErrors} />
-
-            <ValidatedInput field="password" type="password" label="Password" changeCallback={this.handleChange} errors={passwordErrors} />
-
-            <ValidatedInput field="passwordConfirm" type="password" label="Password Confirm" changeCallback={this.handleChange} errors={passwordConfirmationErrors} />
-
-            <div className="form-group sign-up-buttons">
-              <button className="btn btn-primary" disabled={!signUpEnabled} onClick={(e) => this.signUp(e)}>Sign-up</button> <br />
-              <div>Already have an account? <Link to="/signin">Sign In</Link></div>
-            </div>
-          </form>
-        </div>
-      );
-    }
-
-    //if there are error display then in the error field
-    if (this.state.error) {
-      return (
-        <div className="container">
-          <div id="space">
-          </div>
-          <div bsStyle="warning">
-            <strong>{this.state.error}</strong>
-          </div>
-          <form role="form" className="sign-up-form">
-
-            <ValidatedInput field="email" type="email" label="Your Email Address" changeCallback={this.handleChange} errors={emailErrors} />
-
-            <ValidatedInput field="name" type="text" label="Your Name" changeCallback={this.handleChange} errors={handleErrors} />
-
-            <ValidatedInput field="password" type="Password" label="Password" changeCallback={this.handleChange} errors={passwordErrors} />
-
-            <ValidatedInput field="passwordConfirm" type="Password" label="Password Confirm" changeCallback={this.handleChange} errors={passwordConfirmationErrors} />
-
-            <div className="form-group sign-up-buttons">
-              <button className="btn btn-primary" disabled={!signUpEnabled} onClick={(e) => this.signUp(e)}>Sign-up</button>
-              <div>Already have an account? <Link to="/signin">Sign In</Link></div>
-            </div>
-          </form>
-        </div>
-      );
-    } else {*/
-      return (
-        <div className="container">
-          <div id="space">
-          </div>
-          {this.state.fetchErr !== undefined && 
-          <h4 style={{"color": "red"}}>{this.state.fetchErr}</h4>
-           }
-          {this.state.resErr !== undefined && 
-          <h4 style={{"color": "red"}}>{this.state.resErr}</h4>
-           }
+          {this.state.fetchErr !== undefined && <h4 style={{"color": "red"}}>{this.state.fetchErr}</h4>}
+          {this.state.resErr !== undefined && <h4 style={{"color": "red"}}>{this.state.resErr}</h4>}
           <form role="form" className="sign-up-form">
 
             <ValidatedInput field="email" type="email" label="Email Address" changeCallback={this.handleChange} errors={emailErrors} />
@@ -238,7 +181,7 @@ class SignUp extends React.Component {
           </form>
         </div>
       );
-  }
+    }
 }
 
 
