@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, withRouter} from 'react-router-dom'
+import { Link, withRouter } from 'react-router-dom'
 
 class Profile extends React.Component {
   constructor(props) {
@@ -17,7 +17,7 @@ class Profile extends React.Component {
     };
 
     var thisComponent = this;
-        //default base API URL to production
+    //default base API URL to production
     var apiURL = "https://api.leontaolong.me/v1/";
 
     // if our site is being served from localhost,
@@ -47,7 +47,6 @@ class Profile extends React.Component {
             Promise.reject(err)
           });
         } else {
-          console.log(response);
           return response.json();
         }
       })
@@ -58,7 +57,7 @@ class Profile extends React.Component {
         thisComponent.setState({ fetchErr: "Fetch Error: " + err });
       });
   }
-  
+
 
 
   signOut(push) {
@@ -103,9 +102,9 @@ class Profile extends React.Component {
   }
 
   render() {
-    const SignOutButton = withRouter(({history}) => (
+    const SignOutButton = withRouter(({ history }) => (
       <button className="btn btn-primary signOutButton"
-    onClick={() => {this.signOut(() => history.push('/'))}}>Sign Out</button>))
+        onClick={() => { this.signOut(() => history.push('/')) }}>Sign Out</button>))
 
     return (
       <div className="userInfo">

@@ -70,7 +70,6 @@ func (ms *MongoStore) Insert(newUser *NewUser) (*User, error) {
 //Update applies UserUpdates to the currentUser
 func (ms *MongoStore) Update(usrUpdate *UserUpdates, currentUser *User) error {
 	col := ms.Session.DB(ms.DatabaseName).C(ms.CollectionName)
-	fmt.Println(currentUser.ID, usrUpdate.FirstName, usrUpdate.LastName)
 	currentUser.FirstName = usrUpdate.FirstName
 	currentUser.LastName = usrUpdate.LastName
 	updates := bson.M{"$set": usrUpdate}

@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import {App} from './App';
 import {ValidatedInput} from './SignIn';
+import {Utils} from './Utils'
 
 class SignUp extends React.Component {
   constructor(props) {
@@ -77,67 +77,14 @@ class SignUp extends React.Component {
     });
   }
 
-  /**
-   * A helper function to validate a value based on a hash of validations
-   * second parameter has format e.g., 
-   * {required: true, minLength: 5, email: true}
-   * (for required field, with min length of 5, and valid email)
-   */
-  validate(value, validations) {
-    var errors = { isValid: true, style: '' };
-
-    if (value !== undefined) { //check validations
-      //handle required
-      if (validations.required && value === '') {
-        errors.required = true;
-        errors.isValid = false;
-      }
-
-      //handle minLength
-      if (validations.minLength && value.length < validations.minLength) {
-        errors.minLength = validations.minLength;
-        errors.isValid = false;
-      }
-
-      //handle email type ??
-      if (validations.email) {
-        //pattern comparison from w3c
-        //https://www.w3.org/TR/html-markup/input.email.html#input.email.attrs.value.single
-        var valid = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)
-        if (!valid) {
-          errors.email = true;
-          errors.isValid = false;
-        }
-      }
-    }
-
-    //handle the password confirmation matching
-    if (validations.toBeMatched && value !== validations.toBeMatched) {
-      errors.matches = true;
-      errors.isValid = false;
-    }
-
-    //display details
-    if (!errors.isValid) { //if found errors
-      errors.style = 'has-error';
-    }
-    else if (value !== undefined) { //valid and has input
-      //errors.style = 'has-success' //show success coloring
-    }
-    else { //valid and no input
-      errors.isValid = false; //make false anyway
-    }
-    return errors; //return data object
-  }
-
   render() {
     //field validation
-    var emailErrors = this.validate(this.state.email, { required: true, email: true });
-    var passwordErrors = this.validate(this.state.password, { required: true, minLength: 6 });
-    var handleErrors = this.validate(this.state.userName, { required: true });
-    var passwordConfirmationErrors = this.validate(this.state.password, { required: true, toBeMatched: this.state.passwordConf})
-    var lastNameErrors = this.validate(this.state.lastName, { required: true });
-    var firstNameErrors = this.validate(this.state.firstName, { required: true });
+    var emailErrors = Utils.validate(this.state.email, { required: true, email: true });
+    var passwordErrors = Utils.validate(this.state.password, { required: true, minLength: 6 });
+    var handleErrors = Utils.validate(this.state.userName, { required: true });
+    var passwordConfirmationErrors = Utils.validate(this.state.password, { required: true, toBeMatched: this.state.passwordConf})
+    var lastNameErrors = Utils.validate(this.state.lastName, { required: true });
+    var firstNameErrors = Utils.validate(this.state.firstName, { required: true });
     //button validation
     var signUpEnabled = (emailErrors.isValid && passwordErrors.isValid && handleErrors.isValid && passwordConfirmationErrors.isValid && firstNameErrors.isValid && lastNameErrors.isValid);
     return (
@@ -169,6 +116,5 @@ class SignUp extends React.Component {
       );
     }
 }
-
 
 export default SignUp;
