@@ -110,12 +110,17 @@ class Edit extends React.Component {
             Promise.reject(err)
           });
         } else {
+          return response.json();
+        }
+      })
+      .then(function (j) {
+        console.log(j);
+          thisComponent.setState(j);
           thisComponent.setState({
             'resErr': undefined,
             'fetchErr': undefined,
             'updated': true
           });
-        }
       })
       .catch(function (err) {
         thisComponent.setState({ fetchErr: "Fetch Error: " + err });
