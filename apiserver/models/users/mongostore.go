@@ -1,6 +1,8 @@
 package users
 
 import (
+	"fmt"
+
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -33,6 +35,7 @@ func (ms *MongoStore) GetAll() ([]*User, error) {
 //GetByID returns the User with the given ID
 func (ms *MongoStore) GetByID(id UserID) (*User, error) {
 	usr := &User{}
+	fmt.Println(id)
 	err := ms.Session.DB(ms.DatabaseName).C(ms.CollectionName).FindId(id).One(usr)
 	return usr, err
 }
@@ -60,7 +63,6 @@ func (ms *MongoStore) Insert(newUser *NewUser) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	usr.ID = UserID(bson.NewObjectId())
 	err = ms.Session.DB(ms.DatabaseName).C(ms.CollectionName).Insert(usr)
 	return usr, err
 }
@@ -68,9 +70,12 @@ func (ms *MongoStore) Insert(newUser *NewUser) (*User, error) {
 //Update applies UserUpdates to the currentUser
 func (ms *MongoStore) Update(usrUpdate *UserUpdates, currentUser *User) error {
 	col := ms.Session.DB(ms.DatabaseName).C(ms.CollectionName)
+	fmt.Println(currentUser.ID, usrUpdate.FirstName, usrUpdate.LastName)
 	currentUser.FirstName = usrUpdate.FirstName
 	currentUser.LastName = usrUpdate.LastName
-	err := col.UpdateId(currentUser.ID, currentUser)
+	updates := bson.M{"$set": usrUpdate}
+	query := bson.M{"email": string(currentUser.Email)}
+	err := col.Update(query, updates)
 	// for store testing purposes, uncomment the code below
 	// to update the currentUser model with the currentUser from the store
 

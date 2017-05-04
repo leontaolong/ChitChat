@@ -1,6 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
-import App from './App';
+import { Link } from 'react-router-dom';
 
 class SignIn extends React.Component {
 
@@ -13,9 +12,6 @@ class SignIn extends React.Component {
       'resErr': undefined,
       'fetchErr': undefined
     };
-
-
-
     //function binding
     this.handleChange = this.handleChange.bind(this);
   }
@@ -33,7 +29,7 @@ class SignIn extends React.Component {
   signIn(event) {
     event.preventDefault(); //don't submit
     var thisComponent = this;
-        this.setState({resErr: undefined, fetchErr: undefined});
+    this.setState({ resErr: undefined, fetchErr: undefined });
     //default base API URL to production
     var apiURL = "https://api.leontaolong.me/v1/";
 
@@ -41,7 +37,7 @@ class SignIn extends React.Component {
     // or the loop-back address, switch the base API URL
     // to localhost as well
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-        apiURL = "https://localhost:2222/v1/"
+      apiURL = "https://localhost:2222/v1/"
     };
 
     var myHeaders = new Headers();
@@ -50,32 +46,30 @@ class SignIn extends React.Component {
     // delete resErr and fetchErr before handing this.state to the server as a json request
     delete this.state['resErr'];
     delete this.state['fetchErr'];
-    var request = new Request(apiURL + "sessions", { method: 'POST',
-               headers: myHeaders,
-               body: JSON.stringify(this.state),
-               mode: 'cors',
-               cache: 'default' });
+    var request = new Request(apiURL + "sessions", {
+      method: 'POST',
+      headers: myHeaders,
+      body: JSON.stringify(this.state),
+      mode: 'cors',
+      cache: 'default'
+    });
 
     fetch(request)
-    .then(function(response) {
-      if (response.status >= 300) {
-        return response.text().then((err) => {
-          thisComponent.setState({ resErr: "Response Error: " + err });
-          Promise.reject(err)
-        });
-      } else {
-        var authToken = response.headers.get('authorization');
-        localStorage.setItem('authToken', authToken);
-        return response.json();
-      }
-    })
-    .then(function(j) {  
-      console.log(j);
-      thisComponent.props.history.push('/profile');
-    })
-    .catch(function (err) {
-        thisComponent.setState({fetchErr : "Fetch Error: " + err});
-    });
+      .then(function (response) {
+        if (response.status >= 300) {
+          return response.text().then((err) => {
+            thisComponent.setState({ resErr: "Response Error: " + err });
+            Promise.reject(err)
+          });
+        } else {
+          var authToken = response.headers.get('authorization');
+          localStorage.setItem('authToken', authToken);
+          thisComponent.props.history.push('/profile');
+        }
+      })
+      .catch(function (err) {
+        thisComponent.setState({ fetchErr: "Fetch Error: " + err });
+      });
   }
 
   /**
@@ -126,20 +120,20 @@ class SignIn extends React.Component {
     //button validation
     var signInEnabled = (emailErrors.isValid && passwordErrors.isValid);
     return (
-        <div className="container">
-          <div id="space">
-          </div>
-          {this.state.fetchErr !== undefined && <h4 style={{"color": "red"}}>{this.state.fetchErr}</h4>}
-          {this.state.resErr !== undefined && <h4 style={{"color": "red"}}>{this.state.resErr}</h4>}
-          <form role="form" className="sign-up-form">           
-            <ValidatedInput field="email" type="email" label="Email Address" changeCallback={this.handleChange} errors={emailErrors} />
-            <ValidatedInput field="password" type="password" label="Password" changeCallback={this.handleChange} errors={passwordErrors} />
-            <div className="form-group sign-up-buttons">
-              <button className="btn btn-primary" disabled={!signInEnabled} onClick={(e) => this.signIn(e)}>Sign-in</button> <br />
-              <div className="signInUpLink">Don't have an account? <Link to="/signup">Sign Up</Link></div>
-            </div>
-          </form>
+      <div className="container">
+        <div id="space">
         </div>
+        {this.state.fetchErr !== undefined && <h4 style={{ "color": "red" }}>{this.state.fetchErr}</h4>}
+        {this.state.resErr !== undefined && <h4 style={{ "color": "red" }}>{this.state.resErr}</h4>}
+        <form role="form" className="sign-up-form">
+          <ValidatedInput field="email" type="email" label="Email Address" changeCallback={this.handleChange} errors={emailErrors} />
+          <ValidatedInput field="password" type="password" label="Password" changeCallback={this.handleChange} errors={passwordErrors} />
+          <div className="form-group sign-up-buttons">
+            <button className="btn btn-primary" disabled={!signInEnabled} onClick={(e) => this.signIn(e)}>Sign-in</button> <br />
+            <div className="signInUpLink">Don't have an account? <Link to="/signup">Sign Up</Link></div>
+          </div>
+        </form>
+      </div>
     );
   }
 }

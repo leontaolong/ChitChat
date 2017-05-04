@@ -3,11 +3,6 @@ import {Link} from 'react-router-dom';
 import {App} from './App';
 import {ValidatedInput} from './SignIn';
 
-/**
- * A form for signing up and logging into a website.
- * Specifies email, password, user handle, and avatar picture url.
- * Expects `signUpCallback` and `signInCallback` props
- */
 class SignUp extends React.Component {
   constructor(props) {
     super(props);
@@ -72,23 +67,14 @@ class SignUp extends React.Component {
           Promise.reject(err)
         });
       } else {
-        var authtoken = response.headers.get('authorization');
-        localStorage.setItem('authToken', authtoken);
-        return response.json();
+        var authToken = response.headers.get('authorization');
+        localStorage.setItem('authToken', authToken);
+        thisComponent.props.history.push('/profile');
       }
-    })
-    .then(function(j) {   
-      console.log(j);
     })
     .catch(function (err) {
         thisComponent.setState({fetchErr : "Fetch Error: " + err});
     });
-  }
-
-  //handle signIn button
-  signIn(event) {
-    event.preventDefault(); //don't submit
-    this.props.signInCallback(this.state.email, this.state.password);
   }
 
   /**
