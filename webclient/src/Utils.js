@@ -1,3 +1,4 @@
+import React from 'react';
 // util functions
 export var Utils = {
 	/**
@@ -52,5 +53,41 @@ export var Utils = {
 			errors.isValid = false; //make false anyway
 		}
 		return errors; //return data object
-	}
+	},
+	//A component that displays an input form with validation styling
+	//props are: field, type, label, changeCallback, errors
+	'ValidatedInput': class ValidatedInput extends React.Component {
+		render() {
+			return (
+				<div className={"form-group " + this.props.errors.style}>
+					<label htmlFor={this.props.field} className="control-label">{this.props.label}</label>
+					<input aria-label="input" id={this.props.field} type={this.props.type} name={this.props.field} className="form-control" onChange={this.props.changeCallback} />
+					<ValidationErrors errors={this.props.errors} />
+				</div>
+			);
+		}
+	},
+	//a component to represent and display validation errors
+	'ValidationErrors': ValidationErrors
+}
+
+class ValidationErrors extends React.Component {
+		render() {
+			return (
+				<div>
+					{this.props.errors.required &&
+						<p className="help-block">Required!</p>
+					}
+					{this.props.errors.email &&
+						<p className="help-block">Not an email address!</p>
+					}
+					{this.props.errors.minLength &&
+						<p className="help-block">Must be at least {this.props.errors.minLength} characters.</p>
+					}
+					{this.props.errors.matches &&
+						<p className="help-block">Passwords doesn't match</p>
+					}
+				</div>
+			);
+		}
 }

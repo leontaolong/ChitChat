@@ -131,12 +131,13 @@ class Edit extends React.Component {
 
     return (
       <div className="userInfo">
-        {this.state.updated && <h4>Updated Successfully</h4>}
+        {this.state.updated && <h4 style={{ "color": "green" }}>Updated Successfully</h4>}
         {this.state.fetchErr !== undefined && <h4 style={{ "color": "red" }}>{this.state.fetchErr}</h4>}
         {this.state.resErr !== undefined && <h4 style={{ "color": "red" }}>{this.state.resErr}</h4>}
         <img src={this.state.photoURL} alt={this.props.userName} />
-        <div id="username">username: {this.state.userName}</div>
-        <div id="name">Name: {this.state.firstName} {this.state.lastName}</div>
+        <div className="username">username: {this.state.userName}</div>
+        <div className="name">Name: {this.state.firstName} {this.state.lastName}</div>
+        <h3>Edit Profile</h3>
         <ValidatedInput field="newFirstName" type="text" label="First Name" changeCallback={this.handleChange} errors={handleFirstName} />
         <ValidatedInput field="newLastName" type="text" label="Last Name" changeCallback={this.handleChange} errors={handleLastName} />
         <button className="btn btn-primary" disabled={!updateEnabled} onClick={(e) => this.update(e)}>Update</button>

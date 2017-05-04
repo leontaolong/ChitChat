@@ -111,9 +111,9 @@ class Profile extends React.Component {
         {this.state.fetchErr !== undefined && <h4 style={{ "color": "red" }}>{this.state.fetchErr}</h4>}
         {this.state.resErr !== undefined && <h4 style={{ "color": "red" }}>{this.state.resErr}</h4>}
         <img src={this.state.photoURL} alt={this.props.userName} />
-        <div id="username">username: {this.state.userName}</div>
-        <div id="name">name: {this.state.firstName}  {this.state.lastName}</div>
-        <SignOutButton />
+        <div className="username">username: {this.state.userName}</div>
+        <div className="name">name: {this.state.firstName}  {this.state.lastName}</div>
+        <SignOutButton /> <br/>
         <Link to='/edit'><button className="btn btn-primary">Edit Profile</button></Link>
       </div>
     );

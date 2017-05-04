@@ -63,3 +63,8 @@
 .signOutButton{
   margin:2em;
 }
+
+.username, .name {
+  font-size:15px;
+  margin-top:1em;
+}
