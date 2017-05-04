@@ -10,7 +10,6 @@ class App extends Component {
     super(props);
     this.state = {};
     // this.updateUrl = this.updateUrl.bind(this);
-    this.updateUserInfo = this.updateUserInfo.bind(this);
   }
 
   // // update the user-put url and fectch the Open Graph props from the server
@@ -37,11 +36,6 @@ class App extends Component {
   //       });
   // }
 
-  updateUserInfo(userInfo) {
-    console.log(userInfo);
-    this.setState(userInfo);
-  }
-
   render() {
     return (
       <div className="App">
@@ -51,6 +45,7 @@ class App extends Component {
             <Route exact path="/" component={SignIn} />
             <Route path="/signin" component={SignIn} />
             <Route path="/signup" component={SignUp} />
+            <Route path="/profile" component={Profile} />
           </div>
       </Router>
       </div>
@@ -64,7 +59,7 @@ class Header extends Component {
         <div className="mdl-layout--fixed-header">
           <header className="mdl-layout__header">
             <div className="mdl-layout__header-row">
-              <span className="mdl-layout-title">Open Graph Explorer</span>
+              <span className="mdl-layout-title">INFO 344</span>
             </div>
           </header>
          </div>

@@ -14,6 +14,8 @@ class SignIn extends React.Component {
       'fetchErr': undefined
     };
 
+
+
     //function binding
     this.handleChange = this.handleChange.bind(this);
   }
@@ -62,14 +64,13 @@ class SignIn extends React.Component {
           Promise.reject(err)
         });
       } else {
-        var authtoken = response.headers.get('authorization');
-        localStorage.setItem('authToken', authtoken);
+        var authToken = response.headers.get('authorization');
+        localStorage.setItem('authToken', authToken);
         return response.json();
       }
     })
     .then(function(j) {  
       console.log(j);
-      localStorage.setItem('authToken', j.access_token);
     })
     .catch(function (err) {
         thisComponent.setState({fetchErr : "Fetch Error: " + err});

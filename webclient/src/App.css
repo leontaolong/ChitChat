@@ -10,15 +10,6 @@
   padding-left: 25px;
 }
 
-/*.mdl-layout__title, .mdl-layout-title {
-  font-size: 16px;
-}*/
-
-/*.mdl-layout {
-	align-items: center;
-  justify-content: center;
-}*/
-
 .mdl-layout__content {
 	padding: 24px;
 	flex: none;
@@ -60,6 +51,15 @@
 .sign-up-form {
   margin: 3em;
 }
+
 .signInUpLink {
   margin-top: 1em;
+}
+
+.userInfo{
+  margin:5em;
+}
+
+.signOutButton{
+  margin:2em;
 }
