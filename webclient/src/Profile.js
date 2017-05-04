@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom'
 class Profile extends React.Component {
   constructor(props) {
     super(props);
+    this.signOut = this.signOut.bind(this);
     this.state = {
       'email': undefined,
       'userName': undefined,
@@ -15,7 +16,6 @@ class Profile extends React.Component {
       'fetchErr': undefined
     };
     //function binding
-    // this.handleChange = this.handleChange.bind(this);
     var thisComponent = this;
     //default base API URL to production
     var apiURL = "https://api.leontaolong.me/v1/";
@@ -53,9 +53,14 @@ class Profile extends React.Component {
       console.log(j);
     })
     .catch(function (err) {
-        thisComponent.setState({fetchErr : "Fetch Error: " + err});
+      thisComponent.setState({fetchErr : "Fetch Error: " + err});
     });
   }
+
+  signOut(e) {
+    localStorage.removeItem('authToken');
+  }
+
   render() {
     return (
       <div className="userInfo">
@@ -64,7 +69,7 @@ class Profile extends React.Component {
         <img src={this.state.photoURL} alt={this.props.userName} />
         <div id="username">username: {this.state.userName}</div>
         <div id="name">name: {this.state.firstName}  {this.state.lastName}</div>
-        <button className="btn btn-primary signOutButton" onClick={(e) => this.signOut(e)}>Sign Out</button>
+        <Link to='/signin'><button className="btn btn-primary signOutButton" onClick={(e) => this.signOut(e)}>Sign Out</button></Link>
       </div>
     );
   }

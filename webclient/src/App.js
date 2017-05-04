@@ -3,13 +3,13 @@ import './App.css';
 import SignIn from './SignIn';
 import SignUp from './SignUp';
 import Profile from './Profile';
-import { BrowserRouter as Router, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom'
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    // this.updateUrl = this.updateUrl.bind(this);
+    this.authenticated = this.authenticated.bind(this);
   }
 
   // // update the user-put url and fectch the Open Graph props from the server
@@ -35,6 +35,9 @@ class App extends Component {
   //         that.setState({ fetchErr: err.message });
   //       });
   // }
+  authenticated() {    
+    return (localStorage.getItem('authToken') !== null);
+  }
 
   render() {
     return (
@@ -45,7 +48,7 @@ class App extends Component {
             <Route exact path="/" component={SignIn} />
             <Route path="/signin" component={SignIn} />
             <Route path="/signup" component={SignUp} />
-            <Route path="/profile" component={Profile} />
+            <Route path="/profile" render={() => this.authenticated() ? <Profile/> : <Redirect to="/" />} />
           </div>
       </Router>
       </div>

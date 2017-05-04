@@ -71,6 +71,7 @@ class SignIn extends React.Component {
     })
     .then(function(j) {  
       console.log(j);
+      thisComponent.props.history.push('/profile');
     })
     .catch(function (err) {
         thisComponent.setState({fetchErr : "Fetch Error: " + err});
