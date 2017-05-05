@@ -2,5 +2,5 @@
 node_modules
 .idea
 .vscode
-apiserver
+apiserver/apiserver
 tls
