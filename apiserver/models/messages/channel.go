@@ -1,4 +1,4 @@
-package channels
+package messages
 
 import (
 	"challenges-leontaolong/apiserver/models/users"
@@ -22,4 +22,10 @@ type NewChannel struct {
 	Description string         `json:"description"`
 	Members     []users.UserID `json:"members"`
 	Private     bool           `json:"private"`
+}
+
+//ChannelUpdates represents a channel updates
+type ChannelUpdates struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
