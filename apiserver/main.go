@@ -99,14 +99,17 @@ func main() {
 
 //init the server
 func initServer(ctx *handlers.Context) {
-	// systematically creates a initial general channel
-	newChannel := &messages.NewChannel{
-		Name:        "General",
-		Description: "A system created general channel",
-		Private:     false,
-	}
-	_, err := ctx.MessageStore.InsertChannel(newChannel, "system")
-	if err != nil {
-		log.Println("error initializing general channel")
+	//check if there's any public channel in the database
+	if _, err := ctx.MessageStore.GetAllChannels("system"); err != nil {
+		// if not, systematically creates a initial general channel
+		newChannel := &messages.NewChannel{
+			Name:        "General",
+			Description: "A system created general channel",
+			Private:     false,
+		}
+		_, err := ctx.MessageStore.InsertChannel(newChannel, "system")
+		if err != nil {
+			log.Println("error initializing general channel")
+		}
 	}
 }

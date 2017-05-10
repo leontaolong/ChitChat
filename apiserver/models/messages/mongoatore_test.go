@@ -94,7 +94,7 @@ func TestMongoStore(t *testing.T) {
 		t.Errorf("new ID is zero-length\n")
 	}
 
-	channels, err := store.GetAllChannels(usr)
+	channels, err := store.GetAllChannels(usr.ID)
 	if err != nil {
 		t.Errorf("error getting all channels: %v\n", err)
 	}

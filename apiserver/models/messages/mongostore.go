@@ -17,13 +17,13 @@ type MongoStore struct {
 }
 
 //GetAllChannels returns all channelsa a given user is allowed to see
-func (ms *MongoStore) GetAllChannels(user *users.User) ([]*Channel, error) {
+func (ms *MongoStore) GetAllChannels(userID users.UserID) ([]*Channel, error) {
 	channels := []*Channel{}
 	query := bson.M{
 		"$or": []bson.M{
 			bson.M{"private": false},
 			bson.M{"private": true,
-				"members": user.ID}}}
+				"members": userID}}}
 	err := ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName).Find(query).All(&channels)
 	if err != nil {
 		return nil, err

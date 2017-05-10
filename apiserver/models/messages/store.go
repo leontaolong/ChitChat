@@ -5,7 +5,7 @@ import "challenges-leontaolong/apiserver/models/users"
 //Store is an interface that can be implemented using concrete DBMS
 type Store interface {
 	//Get all channels a given user is allowed to see
-	GetAllChannels(user *users.User) ([]*Channel, error)
+	GetAllChannels(userID users.UserID) ([]*Channel, error)
 
 	//InsertChannel Inserts a new channel and returns a Channel stuct
 	InsertChannel(newChannel *NewChannel, creatorID users.UserID) (*Channel, error)
