@@ -7,14 +7,12 @@ import (
 
 //Message represents a message
 type Message struct {
-	ID        string         `json:"id" bson:"_id"`
-	ChannelID string         `json:"channelId" bson:"_channelId"`
-	Body      string         `json:"body"`
-	CreatedAt time.Time      `json:"createdAt"`
-	CreatorID users.UserID   `json:"creatorID"`
-	EditedAt  time.Time      `json:"editedAt"`
-	Members   []users.UserID `json:"members"`
-	Private   bool           `json:"private"`
+	ID        string       `json:"id" bson:"_id"`
+	ChannelID string       `json:"channelId" bson:"_channelId"`
+	Body      string       `json:"body"`
+	CreatedAt time.Time    `json:"createdAt"`
+	CreatorID users.UserID `json:"creatorID"`
+	EditedAt  time.Time    `json:"editedAt"`
 }
 
 //NewMessage represents a new message
@@ -23,7 +21,19 @@ type NewMessage struct {
 	Body      string `json:"body"`
 }
 
-//MeessageUpdate represents a message update
-type MeessageUpdate struct {
+//MessageUpdate represents a message update
+type MessageUpdate struct {
 	Body string `json:"body"`
+}
+
+//ToMessage converts the NewMessage to a Message
+func (nMsg *NewMessage) ToMessage() *Message {
+	message := &Message{
+		Body:      nMsg.Body,
+		ChannelID: nMsg.ChannelID,
+		CreatedAt: time.Now(),
+		EditedAt:  time.Now(),
+	}
+	//return the message
+	return message
 }
