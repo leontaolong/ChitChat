@@ -39,6 +39,9 @@ func TestMongoStore(t *testing.T) {
 		PhotoURL:  "testtest",
 	}
 
+	// sess.DB(store.DatabaseName).C(store.MessageCollectionName).RemoveAll(nil)
+	// sess.DB(store.DatabaseName).C(store.ChannelCollectionName).RemoveAll(nil)
+
 	channel, err := store.InsertChannel(newChan)
 	if err != nil {
 		t.Errorf("error inserting channel: %v\n", err)
@@ -55,8 +58,11 @@ func TestMongoStore(t *testing.T) {
 	if err != nil {
 		t.Errorf("error getting all channels: %v\n", err)
 	}
-	if channels[0] != channel {
-		t.Errorf("ID of channels returned by GetAllChannels didn't xmatch: expected %s but got %s\n", channels[0].ID, channel.ID)
+	if len(channels) != 1 {
+		t.Errorf("incorrect length of all channels: expected %d but got %d\n", 1, len(channels))
+	}
+	if channels[0].ID != channel.ID {
+		t.Errorf("ID of channels returned by GetAllChannels didn't match: expected %s but got %s\n", channels[0].ID, channel.ID)
 	}
 
 	chanUpdates := &ChannelUpdates{
@@ -77,12 +83,12 @@ func TestMongoStore(t *testing.T) {
 
 	err = store.AddMember(usr, channel)
 	if err != nil {
-		t.Errorf("MongoDB adding member error: %s/n", err)
+		t.Errorf("MongoDB adding member error: %s\n", err)
 	}
 
 	err = store.RemoveMember(usr, channel)
 	if err != nil {
-		t.Errorf("MongoDB removing member error: %s/n", err)
+		t.Errorf("MongoDB removing member error: %s\n", err)
 	}
 
 	newMsg := &NewMessage{

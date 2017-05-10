@@ -23,10 +23,10 @@ func (ms *MongoStore) GetAllChannels(user *users.User) ([]*Channel, error) {
 	channels := []*Channel{}
 	query := bson.M{
 		"$or": []bson.M{
-			bson.M{"private": "false"},
-			bson.M{"private": "true",
+			bson.M{"private": false},
+			bson.M{"private": true,
 				"members": user.ID}}}
-	err := ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName).Find(query).All(channels)
+	err := ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName).Find(query).All(&channels)
 	if err != nil {
 		return nil, err
 	}
@@ -70,14 +70,14 @@ func (ms *MongoStore) UpdateChannel(updates *ChannelUpdates, currentChannel *Cha
 
 //DeleteChannel deletes a channel, as well as all messages posted to that channel
 func (ms *MongoStore) DeleteChannel(channel *Channel) error {
-	query := bson.M{"ID": channel.ID}
+	query := bson.M{"_id": channel.ID}
 	return ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName).Remove(query)
 }
 
 //AddMember adds a user to a channel's Members list
 func (ms *MongoStore) AddMember(user *users.User, channel *Channel) error {
 	col := ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName)
-	query := bson.M{"ID": channel.ID}
+	query := bson.M{"_id": channel.ID}
 	updates := bson.M{"$push": bson.M{"members": user.ID}}
 	return col.Update(query, updates)
 }
@@ -85,7 +85,7 @@ func (ms *MongoStore) AddMember(user *users.User, channel *Channel) error {
 //RemoveMember removes a user from a channel's Members list
 func (ms *MongoStore) RemoveMember(user *users.User, channel *Channel) error {
 	col := ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName)
-	query := bson.M{"ID": channel.ID}
+	query := bson.M{"_id": channel.ID}
 	updates := bson.M{"$pull": bson.M{"members": user.ID}}
 	return col.Update(query, updates)
 }
@@ -94,10 +94,7 @@ func (ms *MongoStore) RemoveMember(user *users.User, channel *Channel) error {
 func (ms *MongoStore) InsertMessage(newMessage *NewMessage) (*Message, error) {
 	message := newMessage.ToMessage()
 	message.ID = string(bson.NewObjectId())
-	col := ms.Session.DB(ms.DatabaseName).C(ms.MessageCollectionName)
-	query := bson.M{"ID": message.ChannelID}
-	updates := bson.M{"$push": bson.M{"channelID": message.ChannelID}}
-	err := col.Update(query, updates)
+	err := ms.Session.DB(ms.DatabaseName).C(ms.MessageCollectionName).Insert(message)
 	return message, err
 }
 
@@ -112,6 +109,6 @@ func (ms *MongoStore) UpdateMessage(updates *MessageUpdate, currentMessage *Mess
 
 //DeleteMessage deletes a given message
 func (ms *MongoStore) DeleteMessage(message *Message) error {
-	query := bson.M{"ID": message.ID}
+	query := bson.M{"_id": message.ID}
 	return ms.Session.DB(ms.DatabaseName).C(ms.MessageCollectionName).Remove(query)
 }

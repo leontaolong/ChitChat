@@ -1,3 +1,7 @@
+# for testing
+# docker run mongoDB
+docker run -d -p 27017:27017 -v ~/data:/data/db mongo
+
 # on development machine
 docker build -t leontaolong/info344apiserver .
 docker push leontaolong/info344apiserver
