@@ -101,6 +101,16 @@ func (ms *MongoStore) InsertMessage(newMessage *NewMessage, creator *users.User)
 	return message, err
 }
 
+//GetMessage takes in a messageID and retrurns the corresponding message
+func (ms *MongoStore) GetMessage(messageID string) (*Message, error) {
+	message := &Message{}
+	err := ms.Session.DB(ms.DatabaseName).C(ms.MessageCollectionName).FindId(messageID).One(&message)
+	if err != nil {
+		return nil, err
+	}
+	return message, nil
+}
+
 //UpdateMessage updates an existing message and returns the updated message
 func (ms *MongoStore) UpdateMessage(updates *MessageUpdate, currentMessage *Message) (*Message, error) {
 	col := ms.Session.DB(ms.DatabaseName).C(ms.MessageCollectionName)

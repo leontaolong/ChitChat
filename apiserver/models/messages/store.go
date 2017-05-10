@@ -29,10 +29,13 @@ type Store interface {
 	RemoveMember(userID users.UserID, channel *Channel) error
 
 	//InsertMessage inserts a new message to a given channel and returns the message
-	InsertMessage(newMessage *NewMessage) (*Message, error)
+	InsertMessage(newMessage *NewMessage, creator *users.User) (*Message, error)
+
+	//GetMessage takes in a messageID and retrurns the corresponding message
+	GetMessage(messageID string) (*Message, error)
 
 	//UpdateMessage updates an existing message
-	UpdateMessage(updates *MessageUpdate, currentMessage *Message) error
+	UpdateMessage(updates *MessageUpdate, currentMessage *Message) (*Message, error)
 
 	//DeleteMessage deletes a given message
 	DeleteMessage(message *Message) error

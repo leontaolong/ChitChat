@@ -163,6 +163,11 @@ func TestMongoStore(t *testing.T) {
 		t.Errorf("new ID is zero-length\n")
 	}
 
+	message, err = store.GetMessage(message.ID)
+	if err != nil {
+		t.Errorf("error getting message with the given messageID")
+	}
+
 	msgUpdate := &MessageUpdate{
 		Body: "UPDATED body",
 	}

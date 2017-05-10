@@ -197,3 +197,88 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 		w.Write([]byte("unlink successful!"))
 	}
 }
+
+//MessagesHandler handlea all requests made to the /v1/messages path
+func (ctx *Context) MessagesHandler(w http.ResponseWriter, r *http.Request) {
+	state := &SessionState{}
+	_, err := sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
+	if err != nil {
+		http.Error(w, "error getting session state: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	switch r.Method {
+	case "POST":
+		decoder := json.NewDecoder(r.Body)
+		newMessage := &messages.NewMessage{}
+		if err := decoder.Decode(newMessage); err != nil {
+			http.Error(w, "invalid JSON", http.StatusBadRequest)
+			return
+		}
+
+		message, err := ctx.MessageStore.InsertMessage(newMessage, state.User)
+		if err != nil {
+			http.Error(w, "error inserting new message: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// write to the new message object the client
+		w.Header().Add(headerContentType, contentTypeJSONUTF8)
+		encoder := json.NewEncoder(w)
+		encoder.Encode(message)
+	}
+}
+
+//SpecificMessageHandler handles all requests made to the /v1/messages/<message-id> path.
+func (ctx *Context) SpecificMessageHandler(w http.ResponseWriter, r *http.Request) {
+	// get the given message
+	_, messageID := path.Split(r.URL.Path)
+	message, err := ctx.MessageStore.GetMessage(messageID)
+	if err != nil {
+		http.Error(w, "error getting message with given messageID: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	// get current state
+	state := &SessionState{}
+	_, err = sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
+	if err != nil {
+		http.Error(w, "error getting session state: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	switch r.Method {
+	case "PATCH":
+		decoder := json.NewDecoder(r.Body)
+		update := &messages.MessageUpdate{}
+		if err := decoder.Decode(update); err != nil {
+			http.Error(w, "invalid JSON", http.StatusBadRequest)
+			return
+		}
+
+		if message.CreatorID != state.User.ID { // if the user is not the creator of the given channel
+			http.Error(w, "updating unauthorized: only creator of the message can perform update", http.StatusBadRequest)
+			return
+		}
+
+		message, err = ctx.MessageStore.UpdateMessage(update, message)
+		if err != nil {
+			http.Error(w, "error updating message info: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// write all messages to the client
+		w.Header().Add(headerContentType, contentTypeJSONUTF8)
+		encoder := json.NewEncoder(w)
+		encoder.Encode(message)
+
+	case "DELETE":
+		if message.CreatorID != state.User.ID { // if the user is not the creator of the given channel
+			http.Error(w, "deleting unauthorized: only creator of the message can perform deletion", http.StatusBadRequest)
+			return
+		}
+		err := ctx.MessageStore.DeleteMessage(message)
+		if err != nil {
+			http.Error(w, "error deleting message: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Write([]byte("delete successful!"))
+	}
+}
