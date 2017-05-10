@@ -45,11 +45,11 @@ func (ms *MongoStore) InsertChannel(newChannel *NewChannel) (*Channel, error) {
 //GetMessages gets the most recent N messages posted to a particular channel
 func (ms *MongoStore) GetMessages(num int, channel *Channel) ([]*Message, error) {
 	messages := []*Message{}
-	query := bson.M{"channelID": channel.ID}
+	query := bson.M{"_channelId": channel.ID}
 	err := ms.Session.DB(ms.DatabaseName).C(ms.MessageCollectionName).
 		Find(query).
-		Sort("-createdAt").
-		Limit(num).All(messages)
+		Sort("-createdat").
+		Limit(num).All(&messages)
 	return messages, err
 }
 

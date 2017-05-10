@@ -39,9 +39,6 @@ func TestMongoStore(t *testing.T) {
 		PhotoURL:  "testtest",
 	}
 
-	// sess.DB(store.DatabaseName).C(store.MessageCollectionName).RemoveAll(nil)
-	// sess.DB(store.DatabaseName).C(store.ChannelCollectionName).RemoveAll(nil)
-
 	channel, err := store.InsertChannel(newChan)
 	if err != nil {
 		t.Errorf("error inserting channel: %v\n", err)
@@ -93,7 +90,12 @@ func TestMongoStore(t *testing.T) {
 
 	newMsg := &NewMessage{
 		ChannelID: channel.ID,
-		Body:      "test message body",
+		Body:      "test message body 1",
+	}
+
+	newMsg2 := &NewMessage{
+		ChannelID: channel.ID,
+		Body:      "test message body 2",
 	}
 
 	message, err := store.InsertMessage(newMsg)
@@ -118,6 +120,29 @@ func TestMongoStore(t *testing.T) {
 	}
 	if updatedMsg.Body != "UPDATED body" {
 		t.Errorf("Message body not updated: expected `UPDATED body` but got `%s`\n", updatedMsg.Body)
+	}
+
+	message2, err := store.InsertMessage(newMsg2)
+	if err != nil {
+		t.Errorf("error inserting message: %v\n", err)
+	}
+	if nil == message2 {
+		t.Fatalf("nil returned from MongoStore.InsertMessage()--you probably haven't implemented NewMessage.ToMessage() yet")
+	}
+
+	if len(string(message2.ID)) == 0 {
+		t.Errorf("new ID is zero-length\n")
+	}
+
+	messages, err := store.GetMessages(2, channel)
+	if err != nil {
+		t.Errorf("error getting messages: %v\n", err)
+	}
+	if len(messages) != 2 {
+		t.Errorf("returned messages not enough, expected number of messages: 2 but got: %v\n", len(messages))
+	}
+	if messages[0].Body != message2.Body {
+		t.Errorf("error getting most recent messages: expected `test message body 2` but got `%s`\n", messages[0].Body)
 	}
 
 	err = store.DeleteMessage(message)
