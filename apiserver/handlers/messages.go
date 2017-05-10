@@ -54,7 +54,7 @@ func (ctx *Context) ChannelsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		channel, err := ctx.MessageStore.InsertChannel(newChannel, state.User)
+		channel, err := ctx.MessageStore.InsertChannel(newChannel, state.User.ID)
 		if err != nil {
 			http.Error(w, "error inserting new channel: "+err.Error(), http.StatusInternalServerError)
 			return

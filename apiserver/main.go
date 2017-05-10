@@ -45,7 +45,7 @@ func main() {
 		Addr: redisAddr,
 	})
 
-	fmt.Printf("dialing mongo server at %s...\n", dbAddr)
+	log.Printf("dialing mongo server at %s...\n", dbAddr)
 	mongoSession, err := mgo.Dial(dbAddr)
 	if err != nil {
 		log.Fatalf("error dialing mongo: %v", err)
@@ -88,24 +88,24 @@ func main() {
 	tlsKeyPath := os.Getenv("TLSKEY")
 	tlsCertPath := os.Getenv("TLSCERT")
 
-	fmt.Printf("server is listening at %s...\n", addr)
+	log.Printf("server is listening at %s...\n", addr)
 
 	//start your web server and use log.Fatal() to log
 	//any errors that occur if the server can't start
 	log.Fatal(http.ListenAndServeTLS(addr, tlsCertPath, tlsKeyPath, mux))
-	init()
+	initServer(ctx)
 }
 
 //init the server
-func init() {
+func initServer(ctx *handlers.Context) {
 	// systematically creates a initial general channel
 	newChannel := &messages.NewChannel{
 		Name:        "General",
 		Description: "A system created general channel",
 		Private:     false,
 	}
-	_, err := (*messages.MongoStore).InsertChannel(newChannel, "system")
+	_, err := ctx.MessageStore.InsertChannel(newChannel, "system")
 	if err != nil {
-		fmt.log("error initializing general channel")
+		log.Println("error initializing general channel")
 	}
 }
