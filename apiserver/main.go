@@ -90,10 +90,11 @@ func main() {
 
 	log.Printf("server is listening at %s...\n", addr)
 
+	//init the server
+	initServer(ctx)
 	//start your web server and use log.Fatal() to log
 	//any errors that occur if the server can't start
 	log.Fatal(http.ListenAndServeTLS(addr, tlsCertPath, tlsKeyPath, mux))
-	initServer(ctx)
 }
 
 //init the server

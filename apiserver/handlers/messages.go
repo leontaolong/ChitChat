@@ -59,7 +59,11 @@ func (ctx *Context) ChannelsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "error inserting new channel: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-
+		ctx.MessageStore.AddMember(state.User.ID, channel)
+		if err != nil {
+			http.Error(w, "error adding creator to members: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
 		// write to the new channel object the client
 		encoder.Encode(channel)
 	}

@@ -55,6 +55,9 @@ func TestMongoStore(t *testing.T) {
 		PhotoURL:  "testtest",
 	}
 
+	// sess.DB(store.DatabaseName).C(store.MessageCollectionName).RemoveAll(nil)
+	// sess.DB(store.DatabaseName).C(store.ChannelCollectionName).RemoveAll(nil)
+
 	channel, err := store.InsertChannel(newChan, usr.ID)
 	if err != nil {
 		t.Errorf("error inserting channel: %v\n", err)
@@ -96,7 +99,7 @@ func TestMongoStore(t *testing.T) {
 		t.Errorf("error getting all channels: %v\n", err)
 	}
 	if len(channels) != 2 {
-		t.Errorf("incorrect length of all channels: expected %d but got %d\n", 1, len(channels))
+		t.Errorf("incorrect length of all channels: expected %d but got %d\n", 2, len(channels))
 	}
 	for _, returnedChannel := range channels {
 		if returnedChannel == channel2 {
