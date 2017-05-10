@@ -9,10 +9,7 @@ import (
 )
 
 const (
-	headerContentType = "Content-Type"
-)
-
-const (
+	headerContentType   = "Content-Type"
 	charsetUTF8         = "charset=utf-8"
 	contentTypeJSON     = "application/json"
 	contentTypeJSONUTF8 = contentTypeJSON + "; " + charsetUTF8

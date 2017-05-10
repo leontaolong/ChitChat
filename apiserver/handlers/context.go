@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"challenges-leontaolong/apiserver/models/messages"
 	"challenges-leontaolong/apiserver/models/users"
 	"challenges-leontaolong/apiserver/sessions"
 )
@@ -11,4 +12,5 @@ type Context struct {
 	SessionKey   string
 	SessionStore sessions.Store
 	UserStore    users.Store
+	MessageStore messages.Store
 }

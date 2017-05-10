@@ -7,9 +7,8 @@ type Store interface {
 	//Get all channels a given user is allowed to see
 	GetAllChannels(user *users.User) ([]*Channel, error)
 
-	//InsertChannel Inserts a new channel
-	//and returns a Channel stuct
-	InsertChannel(newChannel *NewChannel) (*Channel, error)
+	//InsertChannel Inserts a new channel and returns a Channel stuct
+	InsertChannel(newChannel *NewChannel, creator *users.User) (*Channel, error)
 
 	//GetMessages gets the most recent N messages posted to a particular channel
 	GetMessages(num int, channel *Channel) ([]*Channel, error)

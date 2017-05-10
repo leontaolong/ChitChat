@@ -16,8 +16,6 @@ type MongoStore struct {
 	ChannelCollectionName string
 }
 
-// //Query represents a json for querying from MongoDB
-
 //GetAllChannels returns all channelsa a given user is allowed to see
 func (ms *MongoStore) GetAllChannels(user *users.User) ([]*Channel, error) {
 	channels := []*Channel{}
@@ -34,10 +32,10 @@ func (ms *MongoStore) GetAllChannels(user *users.User) ([]*Channel, error) {
 }
 
 //InsertChannel Inserts a new channel and returns a Channel stuct
-func (ms *MongoStore) InsertChannel(newChannel *NewChannel) (*Channel, error) {
+func (ms *MongoStore) InsertChannel(newChannel *NewChannel, creator *users.User) (*Channel, error) {
 	channel := newChannel.ToChannel()
 	channel.ID = string(bson.NewObjectId())
-	// channel.CreatorID = handlers.SessionState.User.ID
+	channel.CreatorID = creator.ID
 	err := ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName).Insert(channel)
 	return channel, err
 }
@@ -59,12 +57,7 @@ func (ms *MongoStore) UpdateChannel(updates *ChannelUpdates, currentChannel *Cha
 	currentChannel.Description = updates.Description
 	currentChannel.Name = updates.Name
 	dbUpdates := bson.M{"$set": updates}
-
 	err := col.UpdateId(currentChannel.ID, dbUpdates)
-	// for store testing purposes, uncomment the code below
-	// to update the currentChannel model with the currentChannel from the store
-
-	// ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName).FindId(currentChannel.ID).One(currentChannel)
 	return currentChannel, err
 }
 

@@ -1,9 +1,8 @@
 package messages
 
 import (
-	"testing"
-
 	"challenges-leontaolong/apiserver/models/users"
+	"testing"
 
 	mgo "gopkg.in/mgo.v2"
 )
@@ -22,11 +21,28 @@ func TestMongoStore(t *testing.T) {
 		ChannelCollectionName: "channels",
 	}
 
+	// should be visible
 	newChan := &NewChannel{
 		Name:        "test",
 		Description: "A test Desc",
 		Members:     []users.UserID{"memberA", "memberB"},
 		Private:     false,
+	}
+
+	// should NOT be visible
+	newChan2 := &NewChannel{
+		Name:        "test",
+		Description: "A test Desc",
+		Members:     []users.UserID{"memberA", "memberB"},
+		Private:     true,
+	}
+
+	// should be visible
+	newChan3 := &NewChannel{
+		Name:        "test",
+		Description: "A test Desc",
+		Members:     []users.UserID{"memberA", "memberB", "memberC"},
+		Private:     true,
 	}
 
 	usr := &users.User{
@@ -39,7 +55,31 @@ func TestMongoStore(t *testing.T) {
 		PhotoURL:  "testtest",
 	}
 
-	channel, err := store.InsertChannel(newChan)
+	channel, err := store.InsertChannel(newChan, usr)
+	if err != nil {
+		t.Errorf("error inserting channel: %v\n", err)
+	}
+	if nil == channel {
+		t.Fatalf("nil returned from MongoStore.InsertChannel()--you probably haven't implemented NewChannel.ToChannel() yet")
+	}
+
+	if len(string(channel.ID)) == 0 {
+		t.Errorf("new ID is zero-length\n")
+	}
+
+	channel2, err := store.InsertChannel(newChan2, usr)
+	if err != nil {
+		t.Errorf("error inserting channel: %v\n", err)
+	}
+	if nil == channel {
+		t.Fatalf("nil returned from MongoStore.InsertChannel()--you probably haven't implemented NewChannel.ToChannel() yet")
+	}
+
+	if len(string(channel.ID)) == 0 {
+		t.Errorf("new ID is zero-length\n")
+	}
+
+	channel3, err := store.InsertChannel(newChan3, usr)
 	if err != nil {
 		t.Errorf("error inserting channel: %v\n", err)
 	}
@@ -55,11 +95,19 @@ func TestMongoStore(t *testing.T) {
 	if err != nil {
 		t.Errorf("error getting all channels: %v\n", err)
 	}
-	if len(channels) != 1 {
+	if len(channels) != 2 {
 		t.Errorf("incorrect length of all channels: expected %d but got %d\n", 1, len(channels))
 	}
+	for _, returnedChannel := range channels {
+		if returnedChannel == channel2 {
+			t.Errorf("channel should be invisible to the given user\n")
+		}
+	}
 	if channels[0].ID != channel.ID {
-		t.Errorf("ID of channels returned by GetAllChannels didn't match: expected %s but got %s\n", channels[0].ID, channel.ID)
+		t.Errorf("ID of channels returned by GetAllChannels didn't match: expected %s but got %s\n", channel.ID, channels[0].ID)
+	}
+	if channels[1].ID != channel3.ID {
+		t.Errorf("ID of channels returned by GetAllChannels didn't match: expected %s but got %s\n", channel3.ID, channels[1].ID)
 	}
 
 	chanUpdates := &ChannelUpdates{
@@ -139,7 +187,7 @@ func TestMongoStore(t *testing.T) {
 		t.Errorf("error getting messages: %v\n", err)
 	}
 	if len(messages) != 2 {
-		t.Errorf("returned messages not enough, expected number of messages: 2 but got: %v\n", len(messages))
+		t.Errorf("incorrect length of all messages: expected number of messages: 2 but got: %v\n", len(messages))
 	}
 	if messages[0].Body != message2.Body {
 		t.Errorf("error getting most recent messages: expected `test message body 2` but got `%s`\n", messages[0].Body)
