@@ -32,10 +32,10 @@ func (ms *MongoStore) GetAllChannels(user *users.User) ([]*Channel, error) {
 }
 
 //InsertChannel Inserts a new channel and returns a Channel stuct
-func (ms *MongoStore) InsertChannel(newChannel *NewChannel, creator *users.User) (*Channel, error) {
+func (ms *MongoStore) InsertChannel(newChannel *NewChannel, creatorID users.UserID) (*Channel, error) {
 	channel := newChannel.ToChannel()
 	channel.ID = string(bson.NewObjectId())
-	channel.CreatorID = creator.ID
+	channel.CreatorID = creatorID
 	err := ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName).Insert(channel)
 	return channel, err
 }

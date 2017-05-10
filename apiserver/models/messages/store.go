@@ -8,10 +8,10 @@ type Store interface {
 	GetAllChannels(user *users.User) ([]*Channel, error)
 
 	//InsertChannel Inserts a new channel and returns a Channel stuct
-	InsertChannel(newChannel *NewChannel, creator *users.User) (*Channel, error)
+	InsertChannel(newChannel *NewChannel, creator users.User) (*Channel, error)
 
 	//GetMessages gets the most recent N messages posted to a particular channel
-	GetMessages(num int, channelID string) ([]*Channel, error)
+	GetMessages(num int, channelID string) ([]*Message, error)
 
 	//UpdateChannel updates a channel's Name and Description
 	UpdateChannel(updates *ChannelUpdates, currentChannel *Channel) (*Channel, error)

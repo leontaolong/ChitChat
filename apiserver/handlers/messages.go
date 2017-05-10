@@ -14,6 +14,16 @@ const (
 	maxNumOfMessageReturned = 2000
 )
 
+// //InitChannel initializes a new general channel
+// func (ctx *Context) InitChannel() {
+// 	state := &SessionState{}
+// 	_, err := sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
+// 	if err != nil {
+// 		http.Error(w, "error getting session state: "+err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+// }
+
 //ChannelsHandler handles all requests made to the /v1/channels path
 func (ctx *Context) ChannelsHandler(w http.ResponseWriter, r *http.Request) {
 	state := &SessionState{}

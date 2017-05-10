@@ -55,7 +55,7 @@ func TestMongoStore(t *testing.T) {
 		PhotoURL:  "testtest",
 	}
 
-	channel, err := store.InsertChannel(newChan, usr)
+	channel, err := store.InsertChannel(newChan, usr.ID)
 	if err != nil {
 		t.Errorf("error inserting channel: %v\n", err)
 	}
@@ -67,7 +67,7 @@ func TestMongoStore(t *testing.T) {
 		t.Errorf("new ID is zero-length\n")
 	}
 
-	channel2, err := store.InsertChannel(newChan2, usr)
+	channel2, err := store.InsertChannel(newChan2, usr.ID)
 	if err != nil {
 		t.Errorf("error inserting channel: %v\n", err)
 	}
@@ -79,7 +79,7 @@ func TestMongoStore(t *testing.T) {
 		t.Errorf("new ID is zero-length\n")
 	}
 
-	channel3, err := store.InsertChannel(newChan3, usr)
+	channel3, err := store.InsertChannel(newChan3, usr.ID)
 	if err != nil {
 		t.Errorf("error inserting channel: %v\n", err)
 	}
