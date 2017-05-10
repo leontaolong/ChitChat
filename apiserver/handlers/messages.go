@@ -2,9 +2,16 @@ package handlers
 
 import (
 	"challenges-leontaolong/apiserver/models/messages"
+	"challenges-leontaolong/apiserver/models/users"
 	"challenges-leontaolong/apiserver/sessions"
 	"encoding/json"
 	"net/http"
+	"path"
+	"strconv"
+)
+
+const (
+	maxNumOfMessageReturned = 2000
 )
 
 //ChannelsHandler handles all requests made to the /v1/channels path
@@ -15,15 +22,18 @@ func (ctx *Context) ChannelsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "error getting session state: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Add(headerContentType, contentTypeJSONUTF8)
+	encoder := json.NewEncoder(w)
+
 	switch r.Method {
 	case "GET":
-		w.Header().Add(headerContentType, contentTypeJSONUTF8)
 		channels, err := ctx.MessageStore.GetAllChannels(state.User)
 		if err != nil {
 			http.Error(w, "error getting all channels: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		encoder := json.NewEncoder(w)
+		// write all channels to the client
 		encoder.Encode(channels)
 
 	case "POST":
@@ -41,8 +51,149 @@ func (ctx *Context) ChannelsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// write to the new channel object the client
+		encoder.Encode(channel)
+	}
+}
+
+//SpecificChannelHandler handles all requests made to the /v1/channels/<channel-id> path
+func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Request) {
+	// get the given channel
+	_, channelID := path.Split(r.URL.Path)
+	channel, err := ctx.MessageStore.GetChannel(channelID)
+	if err != nil {
+		http.Error(w, "error getting channel with given channelID: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	// get current state
+	state := &SessionState{}
+	_, err = sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
+	if err != nil {
+		http.Error(w, "error getting session state: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	switch r.Method {
+	case "GET":
+		// get number of recent messages from the query string
+		queryVals := r.URL.Query()
+		msgNumVal := queryVals.Get("msgNum")
+		msgNum, err := strconv.Atoi(msgNumVal)
+		if err != nil {
+			http.Error(w, "error parsing msgNum value as an int: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+		// if the msgNum is too big, set it to maxNumOfMessageReturned
+		if msgNum > maxNumOfMessageReturned {
+			msgNum = maxNumOfMessageReturned
+		}
+
+		// check if channel is visible to the current user
+		isMember := false
+		for _, member := range channel.Members {
+			if member == state.User.ID {
+				isMember = true
+			}
+		}
+
+		if !isMember && channel.Private { // if channel is not visible to the user
+			http.Error(w, "requested channel unauthorized", http.StatusBadRequest)
+			return
+		}
+		// otherwise, get the messages
+		messages, err := ctx.MessageStore.GetMessages(msgNum, channelID)
+		if err != nil {
+			http.Error(w, "error getting all messages: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// write all messages to the client
+		w.Header().Add(headerContentType, contentTypeJSONUTF8)
+		encoder := json.NewEncoder(w)
+		encoder.Encode(messages)
+
+	case "PATCH":
+		decoder := json.NewDecoder(r.Body)
+		updates := &messages.ChannelUpdates{}
+		if err := decoder.Decode(updates); err != nil {
+			http.Error(w, "invalid JSON", http.StatusBadRequest)
+			return
+		}
+
+		if channel.CreatorID != state.User.ID { // if the user is not the creator of the given channel
+			http.Error(w, "updating unauthorized: only creator of the channel can perform update", http.StatusBadRequest)
+			return
+		}
+
+		channel, err = ctx.MessageStore.UpdateChannel(updates, channel)
+		if err != nil {
+			http.Error(w, "error updating channel info: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// write all messages to the client
 		w.Header().Add(headerContentType, contentTypeJSONUTF8)
 		encoder := json.NewEncoder(w)
 		encoder.Encode(channel)
+
+	case "DELETE":
+		if channel.CreatorID != state.User.ID { // if the user is not the creator of the given channel
+			http.Error(w, "deleting unauthorized: only creator of the channel can perform deletion", http.StatusBadRequest)
+			return
+		}
+		err := ctx.MessageStore.DeleteChannel(channel)
+		if err != nil {
+			http.Error(w, "error deleting channel: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Write([]byte("delete successful!"))
+
+	case "LINK":
+		if !channel.Private {
+			err := ctx.MessageStore.AddMember(state.User.ID, channel)
+			if err != nil {
+				http.Error(w, "error adding member: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			if channel.CreatorID != state.User.ID { // if the user is not the creator of the given channel
+				http.Error(w, "linking unauthorized: only creator of the channel can add members", http.StatusBadRequest)
+				return
+			}
+			usrID, err := json.Marshal(r.Header.Get("Link"))
+			if err != nil {
+				http.Error(w, "error marshalling json in request header", http.StatusInternalServerError)
+				return
+			}
+			err = ctx.MessageStore.AddMember(users.UserID(string(usrID)), channel)
+			if err != nil {
+				http.Error(w, "error adding member: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+		w.Write([]byte("link successful!"))
+
+	case "UNLINK":
+		if !channel.Private {
+			err := ctx.MessageStore.RemoveMember(state.User.ID, channel)
+			if err != nil {
+				http.Error(w, "error removing member: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			if channel.CreatorID != state.User.ID { // if the user is not the creator of the given channel
+				http.Error(w, "linking unauthorized: only creator of the channel can add members", http.StatusBadRequest)
+				return
+			}
+			usrID, err := json.Marshal(r.Header.Get("Link"))
+			if err != nil {
+				http.Error(w, "error marshalling json in request header", http.StatusInternalServerError)
+				return
+			}
+			err = ctx.MessageStore.AddMember(users.UserID(string(usrID)), channel)
+			if err != nil {
+				http.Error(w, "error removing member: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+		w.Write([]byte("unlink successful!"))
 	}
 }

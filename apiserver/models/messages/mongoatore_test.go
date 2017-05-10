@@ -126,12 +126,17 @@ func TestMongoStore(t *testing.T) {
 		t.Errorf("Description field not updated: expected `UPDATED Desc` but got `%s`\n", updatedChan.Description)
 	}
 
-	err = store.AddMember(usr, channel)
+	channel, err = store.GetChannel(channel.ID)
+	if err != nil {
+		t.Errorf("error getting channel with the given channelID")
+	}
+
+	err = store.AddMember(usr.ID, channel)
 	if err != nil {
 		t.Errorf("MongoDB adding member error: %s\n", err)
 	}
 
-	err = store.RemoveMember(usr, channel)
+	err = store.RemoveMember(usr.ID, channel)
 	if err != nil {
 		t.Errorf("MongoDB removing member error: %s\n", err)
 	}
@@ -146,7 +151,7 @@ func TestMongoStore(t *testing.T) {
 		Body:      "test message body 2",
 	}
 
-	message, err := store.InsertMessage(newMsg)
+	message, err := store.InsertMessage(newMsg, usr)
 	if err != nil {
 		t.Errorf("error inserting message: %v\n", err)
 	}
@@ -170,7 +175,7 @@ func TestMongoStore(t *testing.T) {
 		t.Errorf("Message body not updated: expected `UPDATED body` but got `%s`\n", updatedMsg.Body)
 	}
 
-	message2, err := store.InsertMessage(newMsg2)
+	message2, err := store.InsertMessage(newMsg2, usr)
 	if err != nil {
 		t.Errorf("error inserting message: %v\n", err)
 	}
@@ -182,7 +187,7 @@ func TestMongoStore(t *testing.T) {
 		t.Errorf("new ID is zero-length\n")
 	}
 
-	messages, err := store.GetMessages(2, channel)
+	messages, err := store.GetMessages(2, channel.ID)
 	if err != nil {
 		t.Errorf("error getting messages: %v\n", err)
 	}
