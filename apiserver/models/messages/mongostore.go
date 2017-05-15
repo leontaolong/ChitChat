@@ -63,6 +63,13 @@ func (ms *MongoStore) GetChannel(channelID string) (*Channel, error) {
 	return channel, nil
 }
 
+//DeleteMessages deletes all messages of the given channelID
+func (ms *MongoStore) DeleteMessages(channelID string) error {
+	query := bson.M{"_channelId": channelID}
+	_, err := ms.Session.DB(ms.DatabaseName).C(ms.MessageCollectionName).RemoveAll(query)
+	return err
+}
+
 //UpdateChannel updates a channel's Name and Description and returns the updated Channel
 func (ms *MongoStore) UpdateChannel(updates *ChannelUpdates, currentChannel *Channel) (*Channel, error) {
 	col := ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName)
@@ -74,8 +81,9 @@ func (ms *MongoStore) UpdateChannel(updates *ChannelUpdates, currentChannel *Cha
 }
 
 //DeleteChannel deletes a channel, as well as all messages posted to that channel
-func (ms *MongoStore) DeleteChannel(channel *Channel) error {
-	return ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName).RemoveId(channel.ID)
+func (ms *MongoStore) DeleteChannel(channel *Channel) (error, error) {
+	return ms.DeleteMessages(channel.ID),
+		ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName).RemoveId(channel.ID)
 }
 
 //AddMember adds a user to a channel's Members list

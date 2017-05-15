@@ -143,9 +143,13 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "deleting unauthorized: only creator of the channel can perform deletion", http.StatusBadRequest)
 			return
 		}
-		err := ctx.MessageStore.DeleteChannel(channel)
-		if err != nil {
-			http.Error(w, "error deleting channel: "+err.Error(), http.StatusInternalServerError)
+		err1, err2 := ctx.MessageStore.DeleteChannel(channel)
+		if err1 != nil {
+			http.Error(w, "error deleting all messages in the channel: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if err2 != nil {
+			http.Error(w, "error deleting the channel: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		w.Write([]byte("delete successful!"))

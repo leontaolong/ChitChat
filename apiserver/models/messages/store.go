@@ -20,7 +20,10 @@ type Store interface {
 	GetChannel(channelID string) (*Channel, error)
 
 	//Delete deletes a channel, as well as all messages posted to that channel
-	DeleteChannel(channel *Channel) error
+	DeleteChannel(channel *Channel) (error, error)
+
+	//DeleteMessages deletes all messages of the given channelID
+	DeleteMessages(channelID string) error
 
 	//AddMember adds a user to a channel's Members list
 	AddMember(userID users.UserID, channel *Channel) error

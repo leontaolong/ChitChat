@@ -9,7 +9,7 @@ docker push leontaolong/info344apiserver
 
 # on deployment server
 docker pull leontaolong/info344apiserver
-# docker stop and rm current running container
+# docker stop and rm currently running container
 export TLSCERT=/etc/letsencrypt/live/api.leontaolong.me/fullchain.pem
 export TLSKEY=/etc/letsencrypt/live/api.leontaolong.me/privkey.pem
 
