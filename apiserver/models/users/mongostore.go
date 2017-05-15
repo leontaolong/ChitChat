@@ -60,7 +60,7 @@ func (ms *MongoStore) Insert(newUser *NewUser) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	usr.ID = UserID(bson.NewObjectId())
+	usr.ID = UserID(bson.NewObjectId().Hex())
 	err = ms.Session.DB(ms.DatabaseName).C(ms.CollectionName).Insert(usr)
 	return usr, err
 }

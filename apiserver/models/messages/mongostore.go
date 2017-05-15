@@ -3,6 +3,8 @@ package messages
 import (
 	"challenges-leontaolong/apiserver/models/users"
 
+	"time"
+
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -34,7 +36,7 @@ func (ms *MongoStore) GetAllChannels(userID users.UserID) ([]*Channel, error) {
 //InsertChannel Inserts a new channel and returns a Channel stuct
 func (ms *MongoStore) InsertChannel(newChannel *NewChannel, creatorID users.UserID) (*Channel, error) {
 	channel := newChannel.ToChannel()
-	channel.ID = string(bson.NewObjectId())
+	channel.ID = bson.NewObjectId().Hex()
 	channel.CreatorID = creatorID
 	err := ms.Session.DB(ms.DatabaseName).C(ms.ChannelCollectionName).Insert(channel)
 	return channel, err
@@ -95,7 +97,7 @@ func (ms *MongoStore) RemoveMember(userID users.UserID, channel *Channel) error 
 //InsertMessage inserts a new message to a given channel
 func (ms *MongoStore) InsertMessage(newMessage *NewMessage, creator *users.User) (*Message, error) {
 	message := newMessage.ToMessage()
-	message.ID = string(bson.NewObjectId())
+	message.ID = bson.NewObjectId().Hex()
 	message.CreatorID = creator.ID
 	err := ms.Session.DB(ms.DatabaseName).C(ms.MessageCollectionName).Insert(message)
 	return message, err
@@ -115,7 +117,7 @@ func (ms *MongoStore) GetMessage(messageID string) (*Message, error) {
 func (ms *MongoStore) UpdateMessage(updates *MessageUpdate, currentMessage *Message) (*Message, error) {
 	col := ms.Session.DB(ms.DatabaseName).C(ms.MessageCollectionName)
 	currentMessage.Body = updates.Body
-	err := col.UpdateId(currentMessage.ID, bson.M{"$set": updates})
+	err := col.UpdateId(currentMessage.ID, bson.M{"$set": bson.M{"editedAt": time.Now(), "body": updates.Body}})
 	return currentMessage, err
 }
 

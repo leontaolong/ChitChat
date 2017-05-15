@@ -51,7 +51,7 @@ func main() {
 		log.Fatalf("error dialing mongo: %v", err)
 	}
 
-	redisStore := sessions.NewRedisStore(rsClient, 3*time.Minute)
+	redisStore := sessions.NewRedisStore(rsClient, 10*time.Minute)
 	ctx := &handlers.Context{
 		SessionKey:   sessionKey,
 		SessionStore: redisStore,
@@ -92,6 +92,7 @@ func main() {
 
 	//init the server
 	initServer(ctx)
+
 	//start your web server and use log.Fatal() to log
 	//any errors that occur if the server can't start
 	log.Fatal(http.ListenAndServeTLS(addr, tlsCertPath, tlsKeyPath, mux))
@@ -100,7 +101,11 @@ func main() {
 //init the server
 func initServer(ctx *handlers.Context) {
 	//check if there's any public channel in the database
-	if _, err := ctx.MessageStore.GetAllChannels("system"); err != nil {
+	publicChannels, err := ctx.MessageStore.GetAllChannels("system")
+	if err != nil {
+		log.Println("error getting existing channels")
+	}
+	if len(publicChannels) == 0 {
 		// if not, systematically creates a initial general channel
 		newChannel := &messages.NewChannel{
 			Name:        "General",

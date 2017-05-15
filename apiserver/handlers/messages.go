@@ -14,16 +14,6 @@ const (
 	maxNumOfMessageReturned = 2000
 )
 
-// //InitChannel initializes a new general channel
-// func (ctx *Context) InitChannel() {
-// 	state := &SessionState{}
-// 	_, err := sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
-// 	if err != nil {
-// 		http.Error(w, "error getting session state: "+err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-// }
-
 //ChannelsHandler handles all requests made to the /v1/channels path
 func (ctx *Context) ChannelsHandler(w http.ResponseWriter, r *http.Request) {
 	state := &SessionState{}
@@ -38,7 +28,7 @@ func (ctx *Context) ChannelsHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
-		channels, err := ctx.MessageStore.GetAllChannels(state.User)
+		channels, err := ctx.MessageStore.GetAllChannels(state.User.ID)
 		if err != nil {
 			http.Error(w, "error getting all channels: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -167,6 +157,7 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error adding member: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
+			w.Write([]byte("link current user successful!"))
 		} else {
 			if channel.CreatorID != state.User.ID { // if the user is not the creator of the given channel
 				http.Error(w, "linking unauthorized: only creator of the channel can add members", http.StatusBadRequest)
@@ -182,8 +173,8 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error adding member: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
+			w.Write([]byte("link user successful!"))
 		}
-		w.Write([]byte("link successful!"))
 
 	case "UNLINK":
 		if !channel.Private {
@@ -192,6 +183,7 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error removing member: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
+			w.Write([]byte("unlink current user successful!"))
 		} else {
 			if channel.CreatorID != state.User.ID { // if the user is not the creator of the given channel
 				http.Error(w, "linking unauthorized: only creator of the channel can add members", http.StatusBadRequest)
@@ -202,13 +194,13 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error marshalling json in request header", http.StatusInternalServerError)
 				return
 			}
-			err = ctx.MessageStore.AddMember(users.UserID(string(usrID)), channel)
+			err = ctx.MessageStore.RemoveMember(users.UserID(string(usrID)), channel)
 			if err != nil {
 				http.Error(w, "error removing member: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
+			w.Write([]byte("unlink user successful!"))
 		}
-		w.Write([]byte("unlink successful!"))
 	}
 }
 
