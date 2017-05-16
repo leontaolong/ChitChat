@@ -12,7 +12,8 @@ const (
 	messageDeleted    = "MESSAGE_DELETED"
 )
 
-type event struct {
+//Event is a event interface
+type Event struct {
 	Type string      `json:"type"`
 	Prop interface{} `json:"prop"`
 }
