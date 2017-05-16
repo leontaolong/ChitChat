@@ -30,7 +30,6 @@ class Profile extends React.Component {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Authorization", localStorage.getItem('authToken'));
-    
     var request = new Request(apiURL + "users/me", {
       method: 'GET',
       headers: myHeaders,
