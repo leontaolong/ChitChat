@@ -116,7 +116,6 @@ func (n *Notifier) broadcast(event interface{}) {
 			}
 		}
 	}
-
 	//If you get an error while writing to a client,
 	//the client has wandered off, so you should call
 	//the `.Close()` method on the client, and delete

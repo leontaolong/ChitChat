@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"path"
 	"strconv"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -291,4 +293,25 @@ func (ctx *Context) SpecificMessageHandler(w http.ResponseWriter, r *http.Reques
 		}
 		w.Write([]byte("delete successful!"))
 	}
+}
+
+//WebSocketUgradeHandler upgrades a http connection to websocket connection
+func (ctx *Context) WebSocketUgradeHandler(w http.ResponseWriter, r *http.Request) {
+	// make sure user is authenticated
+	state := &SessionState{}
+	_, err := sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
+	if err != nil {
+		http.Error(w, "error getting session state: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool { return true },
+	}
+	// Upgrade initial GET request to a websocket
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		http.Error(w, "error upgrading to websocket: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	ctx.Notifier.AddClient(ws)
 }
