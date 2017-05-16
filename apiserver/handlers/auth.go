@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"challenges-leontaolong/apiserver/models/users"
+	"challenges-leontaolong/apiserver/notification"
 	"challenges-leontaolong/apiserver/sessions"
 	"encoding/json"
 	"net/http"
@@ -48,6 +49,10 @@ func (ctx *Context) UsersHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "error inserting user: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
+		ctx.Notifier.Notify(&notification.Event{
+			Type: notification.NewUserCreated,
+			Prop: user,
+		})
 		ctx.HandleBeginSession(user, w, r)
 
 	case "GET":
