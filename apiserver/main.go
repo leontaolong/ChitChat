@@ -4,6 +4,7 @@ import (
 	"challenges-leontaolong/apiserver/handlers"
 	"challenges-leontaolong/apiserver/middleware"
 	"challenges-leontaolong/apiserver/models/users"
+	"challenges-leontaolong/apiserver/notification"
 	"challenges-leontaolong/apiserver/sessions"
 	"fmt"
 	"log"
@@ -52,6 +53,9 @@ func main() {
 	}
 
 	redisStore := sessions.NewRedisStore(rsClient, 10*time.Minute)
+	notifier := notification.NewNotifier()
+	notifier.Start()
+
 	ctx := &handlers.Context{
 		SessionKey:   sessionKey,
 		SessionStore: redisStore,
@@ -66,6 +70,7 @@ func main() {
 			ChannelCollectionName: "channels",
 			MessageCollectionName: "messages",
 		},
+		Notifier: notifier,
 	}
 
 	mux := http.NewServeMux()
@@ -80,6 +85,8 @@ func main() {
 	muxCors.HandleFunc("/v1/channels/", ctx.SpecificChannelHandler)
 	muxCors.HandleFunc("/v1/messages", ctx.MessagesHandler)
 	muxCors.HandleFunc("/v1/messages/", ctx.SpecificMessageHandler)
+
+	muxCors.HandleFunc("/v1/websocket", ctx.WebSocketUgradeHandler)
 
 	muxCors.HandleFunc(apiSummary, handlers.SummaryHandler)
 

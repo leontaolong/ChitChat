@@ -44,7 +44,7 @@ func (n *Notifier) Start() {
 	n.mu.RLock()
 	defer n.mu.RUnlock()
 	for {
-		n.broadcast(<-n.eventq)
+		go n.broadcast(<-n.eventq)
 	}
 }
 
