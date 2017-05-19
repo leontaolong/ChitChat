@@ -1,0 +1,15 @@
+.App {
+  text-align: center;
+}
+
+::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color:   #ccc;
+}
+
+.mdl-layout__header-row {
+  padding-left: 25px;
+}
+
+.mdl-layout__title, .mdl-layout-title {
+  font-size: 16px;
+}

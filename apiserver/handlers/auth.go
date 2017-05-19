@@ -126,12 +126,44 @@ func (ctx *Context) SessionsMineHandler(w http.ResponseWriter, r *http.Request) 
 //UsersMeHandler gets the session state and respond to the client with the session state's User field
 func (ctx *Context) UsersMeHandler(w http.ResponseWriter, r *http.Request) {
 	state := &SessionState{}
-	_, err := sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
+	sid, err := sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
 	if err != nil {
 		http.Error(w, "error getting session state: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Add(headerContentType, contentTypeJSONUTF8)
-	encoder := json.NewEncoder(w)
-	encoder.Encode(state.User)
+	switch r.Method {
+	case "GET":
+		w.Header().Add(headerContentType, contentTypeJSONUTF8)
+		encoder := json.NewEncoder(w)
+		encoder.Encode(state.User)
+
+	case "PATCH":
+		decoder := json.NewDecoder(r.Body)
+		updates := &users.UserUpdates{}
+		if err := decoder.Decode(updates); err != nil {
+			http.Error(w, "invalid JSON", http.StatusBadRequest)
+			return
+		}
+
+		err = ctx.UserStore.Update(updates, state.User)
+		if err != nil {
+			http.Error(w, "error updating user info: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// update the session state
+		state.User.FirstName = updates.FirstName
+		state.User.LastName = updates.LastName
+
+		// save the new session state to session store
+		err = ctx.SessionStore.Save(sid, state)
+		if err != nil {
+			http.Error(w, "error saving new user info to sessionstore: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// write to the client the new user info
+		w.Header().Add(headerContentType, contentTypeJSONUTF8)
+		encoder := json.NewEncoder(w)
+		encoder.Encode(state.User)
+	}
 }

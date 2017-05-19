@@ -10,6 +10,61 @@
   padding-left: 25px;
 }
 
-.mdl-layout__title, .mdl-layout-title {
-  font-size: 16px;
+.mdl-layout__content {
+	padding: 24px;
+	flex: none;
+  margin-top: 5em;
+  text-align: center;
+}
+
+.mdl-card {
+  margin:auto;
+}
+
+.toSignUpPrompt {
+  margin-top: 20px;
+  margin-bottom: 5px;
+  color:#999;
+}
+
+.toSignUpLink {
+  color: #999;
+}
+
+.toSignUpLink:hover, .toSignUpLink:hover:focus {
+  color: #3d4fb0;
+}
+
+.mdl-layout__container {
+  background-color: #f5f5f5;
+}
+
+.sign-up-form button {
+  margin-right:1em;
+}
+
+.sign-up-form .avatar {
+  margin-right: .5em;
+  margin-bottom: .5em;
+}
+
+.sign-up-form {
+  margin: 3em;
+}
+
+.signInUpLink {
+  margin-top: 1em;
+}
+
+.userInfo{
+  margin:5em;
+}
+
+.signOutButton{
+  margin:2em;
+}
+
+.username, .name {
+  font-size:20px;
+  margin-top:0.5em;
 }

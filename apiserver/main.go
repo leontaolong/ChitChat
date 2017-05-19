@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 
+	"time"
+
 	mgo "gopkg.in/mgo.v2"
 	redis "gopkg.in/redis.v5"
 )
@@ -47,7 +49,7 @@ func main() {
 		log.Fatalf("error dialing mongo: %v", err)
 	}
 
-	redisStore := sessions.NewRedisStore(rsClient, 3)
+	redisStore := sessions.NewRedisStore(rsClient, 3*time.Minute)
 	ctx := &handlers.Context{
 		SessionKey:   sessionKey,
 		SessionStore: redisStore,
