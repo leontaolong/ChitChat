@@ -57,7 +57,7 @@ func (ctx *Context) ChannelsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "error adding creator to members: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		go ctx.Notifier.Notify(&notification.Event{
+		ctx.Notifier.Notify(&notification.Event{
 			Type: notification.NewChannelCreated,
 			Prop: channel,
 		})
@@ -140,7 +140,7 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "error updating channel info: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		go ctx.Notifier.Notify(&notification.Event{
+		ctx.Notifier.Notify(&notification.Event{
 			Type: notification.ChannelUpdated,
 			Prop: channel,
 		})
@@ -162,7 +162,7 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "error deleting the channel: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		go ctx.Notifier.Notify(&notification.Event{
+		ctx.Notifier.Notify(&notification.Event{
 			Type: notification.ChannelDeleted,
 			Prop: channel,
 		})
@@ -175,7 +175,7 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error adding member: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
-			go ctx.Notifier.Notify(&notification.Event{
+			ctx.Notifier.Notify(&notification.Event{
 				Type: notification.UserJoinedChannel,
 				Prop: state.User,
 			})
@@ -200,7 +200,7 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error getting user object with the given ID: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
-			go ctx.Notifier.Notify(&notification.Event{
+			ctx.Notifier.Notify(&notification.Event{
 				Type: notification.UserJoinedChannel,
 				Prop: user,
 			})
@@ -214,7 +214,7 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error removing member: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
-			go ctx.Notifier.Notify(&notification.Event{
+			ctx.Notifier.Notify(&notification.Event{
 				Type: notification.UserLeftChannel,
 				Prop: state.User,
 			})
@@ -239,7 +239,7 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error getting user object with the given ID: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
-			go ctx.Notifier.Notify(&notification.Event{
+			ctx.Notifier.Notify(&notification.Event{
 				Type: notification.UserLeftChannel,
 				Prop: user,
 			})
@@ -270,7 +270,7 @@ func (ctx *Context) MessagesHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "error inserting new message: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		go ctx.Notifier.Notify(&notification.Event{
+		ctx.Notifier.Notify(&notification.Event{
 			Type: notification.NewMessagePosted,
 			Prop: message,
 		})
@@ -317,7 +317,7 @@ func (ctx *Context) SpecificMessageHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "error updating message info: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		go ctx.Notifier.Notify(&notification.Event{
+		ctx.Notifier.Notify(&notification.Event{
 			Type: notification.MessageUpdated,
 			Prop: message,
 		})
@@ -336,7 +336,7 @@ func (ctx *Context) SpecificMessageHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "error deleting message: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		go ctx.Notifier.Notify(&notification.Event{
+		ctx.Notifier.Notify(&notification.Event{
 			Type: notification.MessageDeleted,
 			Prop: message,
 		})
@@ -359,7 +359,7 @@ func (ctx *Context) WebSocketUgradeHandler(w http.ResponseWriter, r *http.Reques
 	// Upgrade initial GET request to a websocket
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		http.Error(w, "error upgrading to websocket: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "error upgrading to websocket connection: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	ctx.Notifier.AddClient(ws)

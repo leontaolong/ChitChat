@@ -52,9 +52,9 @@ func main() {
 		log.Fatalf("error dialing mongo: %v", err)
 	}
 
-	redisStore := sessions.NewRedisStore(rsClient, 10*time.Minute)
+	redisStore := sessions.NewRedisStore(rsClient, 20*time.Minute)
 	notifier := notification.NewNotifier()
-	notifier.Start()
+	go notifier.Start()
 
 	ctx := &handlers.Context{
 		SessionKey:   sessionKey,

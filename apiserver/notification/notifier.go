@@ -9,25 +9,26 @@ import (
 
 //Notifier represents a web sockets notifier
 type Notifier struct {
-	eventq  chan interface{}
-	clients map[*websocket.Conn]bool
-	mu      sync.RWMutex
 	//TODO: add other fields you might need
 	//such as another channel or a mutex
 	//(either would work)
 	//remember that go maps ARE NOT safe for
 	//concurrent access, so you must do something
 	//to protect the `clients` map
+	eventq  chan *Event
+	clients map[*websocket.Conn]bool
+	mu      sync.RWMutex
 }
 
 //NewNotifier constructs a new Notifer.
 func NewNotifier() *Notifier {
 	//TODO: create, initialize and return
 	//a Notifier struct
+	nBuf := 500
 	myNotifer := &Notifier{
 		clients: make(map[*websocket.Conn]bool),
 		mu:      sync.RWMutex{},
-		eventq:  make(chan interface{}),
+		eventq:  make(chan *Event, nBuf),
 	}
 	return myNotifer
 }
@@ -41,38 +42,49 @@ func (n *Notifier) Start() {
 	//this should check for new events written
 	//to the `eventq` channel, and broadcast
 	//them to all of the web socket clients
-	n.mu.RLock()
-	defer n.mu.RUnlock()
+	// n.mu.RLock()
+	// defer n.mu.RUnlock()
+	log.Println("notification service is running...")
 	for {
-		go n.broadcast(<-n.eventq)
+		n.mu.RLock()
+		select {
+		case event, ok := <-n.eventq:
+			if ok {
+				n.broadcast(event)
+			} else {
+				log.Println("Channel closed!")
+			}
+		default:
+			// fmt.Println("No value ready, moving on.")
+		}
+		n.mu.RUnlock()
 	}
 }
 
 //AddClient adds a new web socket client to the Notifer
 func (n *Notifier) AddClient(client *websocket.Conn) {
-	n.mu.Lock()
-	defer n.mu.Unlock()
-	cli := n.clients[client]
-	if cli == false {
-		cli = true
-	}
 	//TODO: implement this
 	//But remember that this will be called from
 	//an HTTP handler, and each HTTP request is
 	//processed on its own goroutine, so your
 	//implementation here MUST be safe for concurrent use
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	cli := n.clients[client]
+	if cli == false {
+		n.clients[client] = true
+	}
 
-	go n.readPump(client)
 	//after you add the client to the map,
 	//call n.readPump() on its own goroutine
 	//to proces all of the control messages sent
 	//by the client to the server.
 	//see https://godoc.org/github.com/gorilla/websocket#hdr-Control_Messages
-
+	go n.readPump(client)
 }
 
 //Notify will add a new event to the event queue
-func (n *Notifier) Notify(event interface{}) {
+func (n *Notifier) Notify(event *Event) {
 	//TODO: add the `event` to the `eventq`
 	n.mu.Lock()
 	defer n.mu.Unlock()
@@ -91,13 +103,16 @@ func (n *Notifier) readPump(client *websocket.Conn) {
 	for {
 		if _, _, err := client.NextReader(); err != nil {
 			client.Close()
+			n.mu.Lock()
+			delete(n.clients, client)
+			n.mu.Unlock()
 			break
 		}
 	}
 }
 
 //broadcast sends the event to all client as a JSON-encoded object
-func (n *Notifier) broadcast(event interface{}) {
+func (n *Notifier) broadcast(event *Event) {
 	//TODO: Loop over all of the web socket clients in
 	//n.clients and write the `event` parameter to the client
 	//as a JSON-encoded object.
@@ -105,19 +120,20 @@ func (n *Notifier) broadcast(event interface{}) {
 	//and for even better performance, try using a PreparedMessage:
 	//https://godoc.org/github.com/gorilla/websocket#PreparedMessage
 	//https://godoc.org/github.com/gorilla/websocket#Conn.WritePreparedMessage
-	for {
-		// Send it out to every client that is currently connected
-		for client := range n.clients {
-			err := client.WriteJSON(event)
-			if err != nil {
-				log.Printf("error broadcasting to client: %v", err)
-				client.Close()
-				delete(n.clients, client)
-			}
-		}
-	}
+
 	//If you get an error while writing to a client,
 	//the client has wandered off, so you should call
 	//the `.Close()` method on the client, and delete
 	//it from the n.clients map
+	// Send it out to every client that is currently connected
+	for client := range n.clients {
+		err := client.WriteJSON(event)
+		if err != nil {
+			log.Printf("error broadcasting "+event.Type+" to client: %v", err)
+			client.Close()
+			n.mu.Lock()
+			delete(n.clients, client)
+			n.mu.Unlock()
+		}
+	}
 }

@@ -47,8 +47,14 @@ func GetSessionID(r *http.Request, signingKey string) (SessionID, error) {
 
 	//if it's zero-length, return InvalidSessionID and ErrNoSessionID
 	if len(val) == 0 {
-		return InvalidSessionID, ErrNoSessionID
+		queryVals := r.URL.Query()
+		val = queryVals.Get("auth")
+		// handle wss connection authorization
+		if len(val) == 0 {
+			return InvalidSessionID, ErrNoSessionID
+		}
 	}
+
 	//if it doesn't start with "Bearer ",
 	//return InvalidSessionID and ErrInvalidScheme
 	if !strings.HasPrefix(val, schemeBearer) {
