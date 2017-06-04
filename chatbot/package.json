@@ -1,0 +1,17 @@
+{
+  "name": "chatbot",
+  "version": "1.0.0",
+  "description": "a chatbot micro-service for the chatting web application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Leon Tao Long",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "morgan": "^1.8.2",
+    "node-wit": "^4.2.0"
+  }
+}
