@@ -56,6 +56,11 @@ func main() {
 	notifier := notification.NewNotifier()
 	go notifier.Start()
 
+	botSvrAddr := os.Getenv("BOTSVRADDR")
+	if len(botSvrAddr) == 0 {
+		log.Fatal("you must supply a value for BOTSVRADDR")
+	}
+
 	ctx := &handlers.Context{
 		SessionKey:   sessionKey,
 		SessionStore: redisStore,
@@ -71,6 +76,7 @@ func main() {
 			MessageCollectionName: "messages",
 		},
 		Notifier: notifier,
+		// ChatbotProxy: httputil.NewSingleHostReverseProxy(botSvrURL),
 	}
 
 	mux := http.NewServeMux()
@@ -87,6 +93,7 @@ func main() {
 	muxCors.HandleFunc("/v1/messages/", ctx.SpecificMessageHandler)
 
 	muxCors.HandleFunc("/v1/websocket", ctx.WebSocketUgradeHandler)
+	muxCors.Handle("/v1/bot", ctx.GetServiceProxy(botSvrAddr))
 
 	muxCors.HandleFunc(apiSummary, handlers.SummaryHandler)
 

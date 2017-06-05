@@ -1,10 +1,17 @@
 "use strict";
 
 const express = require('express');
+const morgan = require('morgan');
+const cors = require('cors');
 const { Wit } = require('node-wit');
 const bodyParser = require('body-parser');
 
 const app = express();
+
+app.use(morgan(process.env.LOGFORMAT || 'dev'));
+//add CORS headers
+app.use(cors());
+
 const port = process.env.PORT || '80';
 const host = process.env.HOST || '';
 const dbAddr = process.env.DBADDR;
@@ -34,6 +41,7 @@ function handleWhenLastPost(req, res, userData, witaiData) {
         assert.equal(null, err);
         console.log("Connected correctly to server");
         dbFuncs.getLastMessages(db, userData, (result) => {
+            console.log(result);
             res.send(result);
             db.close();
         });
@@ -46,8 +54,9 @@ app.get("/v1/bot", (req, res, next) => {
 	//extract meaning from the value in the
 	//`q` query string param and respond
 	//accordingly
-    if (req.method = "POST") {
+    console.log("in node handler");
         let question = req.body;
+        console.log(req.headers);
         let user = JSON.parse(req.headers.User);
         console.log(`user is asking ${question}`);
 	    witaiClient.message(question)
@@ -65,8 +74,11 @@ app.get("/v1/bot", (req, res, next) => {
 			}
 		})
 		.catch(next);
-    }
 });
+
+app.post("/this", (req, res, next) => {
+    console.log("hello");
+})
 
 app.listen(port, host, () => {
 	console.log(`server is listening at http://${host}:${port}`);
