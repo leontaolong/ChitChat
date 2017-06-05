@@ -248,7 +248,7 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-//MessagesHandler handlea all requests made to the /v1/messages path
+//MessagesHandler handles all requests made to the /v1/messages path
 func (ctx *Context) MessagesHandler(w http.ResponseWriter, r *http.Request) {
 	state := &SessionState{}
 	_, err := sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
