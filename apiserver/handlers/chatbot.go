@@ -23,5 +23,5 @@ func (ctx *Context) ChatbotHandler(w http.ResponseWriter, r *http.Request) {
 
 	// add the User header containing current user info and redirect to Node.js chatbot microservice
 	r.Header.Add("User", bufStr)
-	http.Redirect(w, r, "http://www.google.com", 301)
+	http.Redirect(w, r, "localhost:2222/v1/bot", 301)
 }

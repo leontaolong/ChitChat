@@ -11,6 +11,7 @@
   "dependencies": {
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
+    "mongodb": "^2.2.28",
     "morgan": "^1.8.2",
     "node-wit": "^4.2.0"
   }
