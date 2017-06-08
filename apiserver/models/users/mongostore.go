@@ -1,8 +1,6 @@
 package users
 
 import (
-	"fmt"
-
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -35,7 +33,6 @@ func (ms *MongoStore) GetAll() ([]*User, error) {
 //GetByID returns the User with the given ID
 func (ms *MongoStore) GetByID(id UserID) (*User, error) {
 	usr := &User{}
-	fmt.Println(id)
 	err := ms.Session.DB(ms.DatabaseName).C(ms.CollectionName).FindId(id).One(usr)
 	return usr, err
 }
@@ -63,6 +60,7 @@ func (ms *MongoStore) Insert(newUser *NewUser) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	usr.ID = UserID(bson.NewObjectId().Hex())
 	err = ms.Session.DB(ms.DatabaseName).C(ms.CollectionName).Insert(usr)
 	return usr, err
 }
