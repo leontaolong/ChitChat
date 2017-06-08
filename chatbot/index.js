@@ -34,6 +34,9 @@ if (!dbAddr) {
 
 const witaiClient = new Wit({ accessToken: witaiToken });
 
+app.use(bodyParser.json());
+app.use(bodyParser.text());
+
 
 function handleWhenLastPost(req, res, userData, witaiData) {
     // Use connect method to connect to the Server
@@ -49,21 +52,20 @@ function handleWhenLastPost(req, res, userData, witaiData) {
 }
 
 
-app.get("/v1/bot", (req, res, next) => {
+app.post("/v1/bot", (req, res, next) => {
 	//TODO: use witaiClient.message() to
 	//extract meaning from the value in the
 	//`q` query string param and respond
 	//accordingly
-    console.log("in node handler");
         let question = req.body;
-        console.log(req.headers);
-        let user = JSON.parse(req.headers.User);
+        console.log(req.body);
+        let user = JSON.parse(req.get("User"));
         console.log(`user is asking ${question}`);
 	    witaiClient.message(question)
 		.then(data => {
 			console.log(JSON.stringify(data, undefined, 2));
 			switch (data.entities.intent[0].value) {
-				case "last_post":
+				case "last post":
                     switch(data.entities.question_type[0].value) {
                         case "when":
                         	handleWhenLastPost(req, res, user, data);
