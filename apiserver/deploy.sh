@@ -17,5 +17,6 @@ docker run -d --name 344api -p 443:443\
 -v /etc/letsencrypt:/etc/letsencrypt:ro \
 -e TLSCERT=$TLSCERT -e TLSKEY=$TLSKEY \
 -e REDISADDR=session-store:6379 -e DBADDR=user-store:27017 \
+-e BOTSVRADDR=344chatbot:80 \
 --network api-server-net \
 leontaolong/info344apiserver
