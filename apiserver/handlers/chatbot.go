@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"challenges-leontaolong/apiserver/sessions"
 	"encoding/json"
-	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -12,24 +13,31 @@ import (
 //GetServiceProxy returns a ReverseProxy for a microservice
 //given the services address (host:port)
 func (ctx *Context) GetServiceProxy(svcAddr string) *httputil.ReverseProxy {
-	fmt.Println("in get proxy")
 	return &httputil.ReverseProxy{
 		Director: func(r *http.Request) {
+			t := http.Response{
+				Body: ioutil.NopCloser(bytes.NewBufferString("Hello World")),
+			}
+
+			buff := bytes.NewBuffer(nil)
+			t.Write(buff)
+
 			state := &SessionState{}
 			_, err := sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
 			if err != nil {
-				log.Println("error getting session state")
+				buff.WriteString("error getting session state")
 			}
-			r.URL.Scheme = "http"
-			r.URL.Host = svcAddr
-
 			// get a json-encoded string of the User object
 			user := state.User
 			j, err := json.Marshal(user)
 			if err != nil {
-				log.Println("error marshalling user object")
+				buff.WriteString("error marshalling user object")
 			}
 			r.Header.Add("User", string(j))
+
+			r.URL.Scheme = "http"
+			r.URL.Host = svcAddr
+			log.Println(user)
 		},
 	}
 }

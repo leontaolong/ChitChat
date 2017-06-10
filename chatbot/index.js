@@ -5,22 +5,22 @@ const morgan = require('morgan');
 const cors = require('cors');
 const { Wit } = require('node-wit');
 const bodyParser = require('body-parser');
+const mongodb = require('mongodb');
+
+const MessageStore = require('./models/messages/mongostore.js');
+const ChannelStore = require('./models/channels/mongostore.js');
 
 const app = express();
 
 app.use(morgan(process.env.LOGFORMAT || 'dev'));
 //add CORS headers
-app.use(cors());
+// app.use(cors());
 
 const port = process.env.PORT || '80';
 const host = process.env.HOST || '';
 const dbAddr = process.env.DBADDR;
 const witaiToken = process.env.WITAITOKEN;
 
-const dbFuncs = require('./db').funcs;
-
-const MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
 
 if (!witaiToken) {
 	console.error("please set WITAITOKEN to your wit.ai app token");
@@ -32,56 +32,29 @@ if (!dbAddr) {
 	process.exit(1);
 }
 
-const witaiClient = new Wit({ accessToken: witaiToken });
-
 app.use(bodyParser.json());
 app.use(bodyParser.text());
 
+mongodb.MongoClient.connect(`mongodb://${dbAddr}/info344`)
+    .then(db => {
+		let colChannels = db.collection('channels');
+        let colMessages = db.collection('messages');
 
-function handleWhenLastPost(req, res, userData, witaiData) {
-    // Use connect method to connect to the Server
-    MongoClient.connect(dbAddr, function(err, db) {
-        assert.equal(null, err);
-        console.log("Connected correctly to server");
-        dbFuncs.getLastMessages(db, userData, (result) => {
-            console.log(result);
-            res.send(result);
-            db.close();
+		let channelStore = new ChannelStore(colChannels);
+		let messageStore = new MessageStore(colMessages);
+        let handlers = require('./handlers/handlers.js');
+		app.use(handlers(channelStore, messageStore));
+
+        //error handler
+        app.use((err, req, res, next) => {
+            console.error(err);
+            res.status(err.status || 500).send(err.message);
         });
+
+        app.listen(port, host, () => {
+            console.log(`server is listening at http://${host}:${port}...`);
+        });
+    })
+    .catch(err => {
+        console.error(err);
     });
-}
-
-
-app.post("/v1/bot", (req, res, next) => {
-	//TODO: use witaiClient.message() to
-	//extract meaning from the value in the
-	//`q` query string param and respond
-	//accordingly
-        let question = req.body;
-        console.log(req.body);
-        let user = JSON.parse(req.get("User"));
-        console.log(`user is asking ${question}`);
-	    witaiClient.message(question)
-		.then(data => {
-			console.log(JSON.stringify(data, undefined, 2));
-			switch (data.entities.intent[0].value) {
-				case "last post":
-                    switch(data.entities.question_type[0].value) {
-                        case "when":
-                        	handleWhenLastPost(req, res, user, data);
-					    break;     
-                    }			
-				default:
-					res.send("Sorry, I'm not sure how to answer that. Please try again.");
-			}
-		})
-		.catch(next);
-});
-
-app.post("/this", (req, res, next) => {
-    console.log("hello");
-})
-
-app.listen(port, host, () => {
-	console.log(`server is listening at http://${host}:${port}`);
-});
