@@ -14,8 +14,8 @@ const UserStore = require('./models/users/mongostore.js');
 const app = express();
 
 app.use(morgan(process.env.LOGFORMAT || 'dev'));
-//add CORS headers
-// app.use(cors());
+// add CORS headers
+app.use(cors());
 
 const port = process.env.PORT || '80';
 const host = process.env.HOST || '';
@@ -43,7 +43,7 @@ mongodb.MongoClient.connect(`mongodb://${dbAddr}/info344`)
 		let colUsers = db.collection('users');
 
         let handlers = require('./handlers/handlers.js');
-		
+
 		let channelStore = new ChannelStore(colChannels);
 		let messageStore = new MessageStore(colMessages);
 		let userStore = new UserStore(colUsers);

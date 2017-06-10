@@ -91,8 +91,7 @@ module.exports = function(channelStore, messageStore, userStore) {
                                 let channelName = data.entities.channel_name[0].value;
                                 let channel = await channelStore.getChannelByName(channelName);
                                 let posts = await messageStore.getAllPosts(channel[0]._id);
-                                let userNames = await getUsersWithMostPosts(posts);
-                                
+                                let userNames = await getUsersWithMostPosts(posts);   
                                 // let users = mode(posts);
                                 // let userObj = [];
                                 // for (let i = 0; i < users.length; i++) {
@@ -110,7 +109,17 @@ module.exports = function(channelStore, messageStore, userStore) {
                 case "List all":
                     if (data.entities.question_type[0].value == "Who") {
                         if (data.entities.channel_name) {
-
+                            try {
+                                let channelName = data.entities.channel_name[0].value;
+                                let channel = await channelStore.getChannel(channelName);
+                                console.log(channel);
+                                let memberIds = channel[0].members.map((member) => member._id);
+                                let memberNames = await getUserNameByID(memberIds);
+                                console.log(channel[0].members)
+                                res.json(memberNames);
+                            } catch(err) {
+                                next(err);
+                            }           
                         }
                     }
                 break;			
@@ -143,11 +152,17 @@ module.exports = function(channelStore, messageStore, userStore) {
             if (modeMap[el] == maxCount)
                 users.push(el)
         });
+        return getUserNameByID(users);
+    }
+
+    // takes in an array of userIDs and returns an array of corresponding usernames
+    async function getUserNameByID(usernIds) {
         let userObj = [];
-        for (let i = 0; i < users.length; i++) {
-            let userArr = await userStore.getUserByID(users[i]);
+        for (let i = 0; i < usernIds.length; i++) {
+            let userArr = await userStore.getUserByID(usernIds[i]);
             userObj.push(userArr[0])
         }
+        console.log(userObj)
         let userNames = userObj.map((ele) => {if (ele) return ele.firstname + " " + ele.lastname});
         return userNames;
     }

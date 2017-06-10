@@ -24,6 +24,10 @@ class MongoStore {
     getChannelByName(channelName) {
         return this.collection.find( { "name" : channelName}).limit(1).toArray();
     }
+
+    getChannel(channelName) {
+        return this.collection.find( {"name" : channelName}).toArray();
+    }
 }
 
 //export the class
