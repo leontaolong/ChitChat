@@ -22,20 +22,20 @@ class MongoStore {
     }
 
     getLastPost(user) {
-        return this.collection.find( { "creatorid" : "Y\t\ufffd\ufffd\ufffd\ufffd\ufffdЛ\ufffde\t"}).sort({
+        return this.collection.find( { "creatorid" : user.id}).sort({
                 "createdat": -1
             }).limit(1).toArray();
     }
 
     getLastPostInChann(user, channelID) {
-        return this.collection.find( { "creatorid" : "Y\t\ufffd\ufffd\ufffd\ufffd\ufffdЛ\ufffde\t", "_channelId" : channelID})
+        return this.collection.find( { "creatorid" :  user.id, "_channelId" : channelID})
         .sort({
                 "createdat": -1
             }).limit(1).toArray();
     }
 
     getNumOfPostInChann(user, channelID) {
-        return this.collection.find( { "creatorid" : "Y\t\ufffd\ufffd\ufffd\ufffd\ufffdЛ\ufffde\t", "_channelId" : channelID}).toArray();
+        return this.collection.find( { "creatorid" :  user.id, "_channelId" : channelID}).toArray();
     }
 
     getNumOfPostInChannWithDatetime(user, channelID, datetime) {
@@ -49,7 +49,7 @@ class MongoStore {
         dateMidnight.setMinutes(59);
         dateMidnight.setSeconds(59);
 
-        return this.collection.find( { "creatorid" : "Y\t\ufffd\ufffd\ufffd\ufffd\ufffdЛ\ufffde\t", "_channelId" : channelID,
+        return this.collection.find( { "creatorid" :  user.id, "_channelId" : channelID,
         "createdat" : { $gt: startDate, 
                         $lt: dateMidnight}}
         ).toArray();

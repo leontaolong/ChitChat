@@ -19,7 +19,7 @@ import (
 	redis "gopkg.in/redis.v5"
 )
 
-const defaultPort = "2222" //default port for https
+const defaultPort = "443" //default port for https
 
 const (
 	apiRoot    = "/v1/"

@@ -15,7 +15,7 @@ const app = express();
 
 app.use(morgan(process.env.LOGFORMAT || 'dev'));
 // add CORS headers
-app.use(cors());
+// app.use(cors());
 
 const port = process.env.PORT || '80';
 const host = process.env.HOST || '';
@@ -33,8 +33,8 @@ if (!dbAddr) {
 	process.exit(1);
 }
 
-app.use(bodyParser.json());
 app.use(bodyParser.text());
+// app.use(bodyParser.json());
 
 mongodb.MongoClient.connect(`mongodb://${dbAddr}/info344`)
     .then(db => {
