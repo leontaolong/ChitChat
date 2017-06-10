@@ -5,7 +5,6 @@ import (
 	"challenges-leontaolong/apiserver/sessions"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httputil"
 )
@@ -37,7 +36,6 @@ func (ctx *Context) GetServiceProxy(svcAddr string) *httputil.ReverseProxy {
 
 			r.URL.Scheme = "http"
 			r.URL.Host = svcAddr
-			log.Println(user)
 		},
 	}
 }

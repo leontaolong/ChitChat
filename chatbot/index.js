@@ -9,6 +9,7 @@ const mongodb = require('mongodb');
 
 const MessageStore = require('./models/messages/mongostore.js');
 const ChannelStore = require('./models/channels/mongostore.js');
+const UserStore = require('./models/users/mongostore.js');
 
 const app = express();
 
@@ -39,11 +40,15 @@ mongodb.MongoClient.connect(`mongodb://${dbAddr}/info344`)
     .then(db => {
 		let colChannels = db.collection('channels');
         let colMessages = db.collection('messages');
+		let colUsers = db.collection('users');
 
+        let handlers = require('./handlers/handlers.js');
+		
 		let channelStore = new ChannelStore(colChannels);
 		let messageStore = new MessageStore(colMessages);
-        let handlers = require('./handlers/handlers.js');
-		app.use(handlers(channelStore, messageStore));
+		let userStore = new UserStore(colUsers);
+
+		app.use(handlers(channelStore, messageStore, userStore));
 
         //error handler
         app.use((err, req, res, next) => {

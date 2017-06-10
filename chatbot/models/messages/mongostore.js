@@ -37,6 +37,27 @@ class MongoStore {
     getNumOfPostInChann(user, channelID) {
         return this.collection.find( { "creatorid" : "Y\t\ufffd\ufffd\ufffd\ufffd\ufffdЛ\ufffde\t", "_channelId" : channelID}).toArray();
     }
+
+    getNumOfPostInChannWithDatetime(user, channelID, datetime) {
+        var startDate = new Date(datetime);
+        startDate.setSeconds(0);
+        startDate.setHours(0);
+        startDate.setMinutes(0);
+
+        var dateMidnight = new Date(datetime);
+        dateMidnight.setHours(23);
+        dateMidnight.setMinutes(59);
+        dateMidnight.setSeconds(59);
+
+        return this.collection.find( { "creatorid" : "Y\t\ufffd\ufffd\ufffd\ufffd\ufffdЛ\ufffde\t", "_channelId" : channelID,
+        "createdat" : { $gt: startDate, 
+                        $lt: dateMidnight}}
+        ).toArray();
+    }
+
+    getAllPosts(channelID) {
+        return this.collection.find( {"_channelId" : channelID}).toArray();
+    }
 }
 
 //export the class

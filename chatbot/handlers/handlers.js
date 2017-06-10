@@ -7,7 +7,7 @@ const { Wit } = require('node-wit');
 
 //export a function from this module 
 //that accepts a tasks store implementation
-module.exports = function(channelStore, messageStore) {
+module.exports = function(channelStore, messageStore, userStore) {
     //create a new Mux
     let router = express.Router();
 
@@ -21,11 +21,6 @@ module.exports = function(channelStore, messageStore) {
         } catch(err) {
             next(err);
         }
-        // store.getAll()
-        //     .then(tasks => {
-        //         res.json(tasks);
-        //     })
-        //     .catch(next);
     });
 
     router.post('/v1/bot', (req, res, next) => {
@@ -65,23 +60,97 @@ module.exports = function(channelStore, messageStore) {
                     switch(data.entities.question_type[0].value) {
                         case "How many":
                             if (data.entities.channel_name) {
-                                try {
-                                    let channelName = data.entities.channel_name[0].value;
-                                    let channel = await channelStore.getChannelByName(channelName);
-                                    let result = await messageStore.getNumOfPostInChann(user, channel[0]._id);
-                                    res.json(result.length);
-                                } catch(err) {
-                                    next(err);
-                                } 
+                                if (data.entities.datetime) {
+                                    try {
+                                        let datetime = data.entities.datetime[0].value
+                                        let channelName = data.entities.channel_name[0].value;
+                                        let channel = await channelStore.getChannelByName(channelName);
+                                        let result = await messageStore.getNumOfPostInChannWithDatetime(user, channel[0]._id, datetime);
+                                        res.json(result.length);
+                                    } catch(err) {
+                                        next(err);
+                                    }
+                                } else {
+                                    try {
+                                        let channelName = data.entities.channel_name[0].value;
+                                        let channel = await channelStore.getChannelByName(channelName);
+                                        let result = await messageStore.getNumOfPostInChann(user, channel[0]._id);
+                                        res.json(result.length);
+                                    } catch(err) {
+                                        next(err);
+                                    }
+                                }
                             }
                         break;
                     }            
-                break;  			
+                break; 
+                case "most_posts":
+                    if (data.entities.question_type[0].value == "Who") {
+                        if (data.entities.channel_name) {
+                            try {
+                                let channelName = data.entities.channel_name[0].value;
+                                let channel = await channelStore.getChannelByName(channelName);
+                                let posts = await messageStore.getAllPosts(channel[0]._id);
+                                let userNames = await getUsersWithMostPosts(posts);
+                                
+                                // let users = mode(posts);
+                                // let userObj = [];
+                                // for (let i = 0; i < users.length; i++) {
+                                //     let userArr = await userStore.getUserByID(users[i]);
+                                //     userObj.push(userArr[0])
+                                // }
+                                // let userNames = userObj.map((ele) => {if (ele) return ele.firstname + " " + ele.lastname});
+                                res.json(userNames);
+                            } catch(err) {
+                                next(err);
+                            }
+                        }
+                    }
+                break; 
+                case "List all":
+                    if (data.entities.question_type[0].value == "Who") {
+                        if (data.entities.channel_name) {
+
+                        }
+                    }
+                break;			
 				default:
 					res.send("Sorry, I'm not sure how to answer that. Please try again.");
 			}
 		})
 		.catch(next);
     });
+
+    async function getUsersWithMostPosts(array){
+        if(array.length == 0)
+            return null;
+        var modeMap = {};
+        var users = [];
+        var maxEl = array[0].creatorid, maxCount = 1;
+        for(var i = 0; i < array.length; i++)
+        {
+            var el = array[i].creatorid;
+            if(modeMap[el] == null)
+                modeMap[el] = 1;
+            else
+                modeMap[el]++;  
+            if(modeMap[el] > maxCount)
+            {
+                maxCount = modeMap[el];
+            }
+        }
+        Object.keys(modeMap).forEach((el) => {
+            if (modeMap[el] == maxCount)
+                users.push(el)
+        });
+        let userObj = [];
+        for (let i = 0; i < users.length; i++) {
+            let userArr = await userStore.getUserByID(users[i]);
+            userObj.push(userArr[0])
+        }
+        let userNames = userObj.map((ele) => {if (ele) return ele.firstname + " " + ele.lastname});
+        return userNames;
+    }
+
     return router;
 };
