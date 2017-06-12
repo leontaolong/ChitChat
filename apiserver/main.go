@@ -4,6 +4,7 @@ import (
 	"challenges-leontaolong/apiserver/handlers"
 	"challenges-leontaolong/apiserver/middleware"
 	"challenges-leontaolong/apiserver/models/users"
+	"challenges-leontaolong/apiserver/notification"
 	"challenges-leontaolong/apiserver/sessions"
 	"fmt"
 	"log"
@@ -51,7 +52,15 @@ func main() {
 		log.Fatalf("error dialing mongo: %v", err)
 	}
 
-	redisStore := sessions.NewRedisStore(rsClient, 10*time.Minute)
+	redisStore := sessions.NewRedisStore(rsClient, 20*time.Minute)
+	notifier := notification.NewNotifier()
+	go notifier.Start()
+
+	botSvrAddr := os.Getenv("BOTSVRADDR")
+	if len(botSvrAddr) == 0 {
+		log.Fatal("you must supply a value for BOTSVRADDR")
+	}
+
 	ctx := &handlers.Context{
 		SessionKey:   sessionKey,
 		SessionStore: redisStore,
@@ -66,6 +75,8 @@ func main() {
 			ChannelCollectionName: "channels",
 			MessageCollectionName: "messages",
 		},
+		Notifier: notifier,
+		// ChatbotProxy: httputil.NewSingleHostReverseProxy(botSvrURL),
 	}
 
 	mux := http.NewServeMux()
@@ -80,6 +91,9 @@ func main() {
 	muxCors.HandleFunc("/v1/channels/", ctx.SpecificChannelHandler)
 	muxCors.HandleFunc("/v1/messages", ctx.MessagesHandler)
 	muxCors.HandleFunc("/v1/messages/", ctx.SpecificMessageHandler)
+
+	muxCors.HandleFunc("/v1/websocket", ctx.WebSocketUgradeHandler)
+	muxCors.Handle("/v1/bot", ctx.GetServiceProxy(botSvrAddr))
 
 	muxCors.HandleFunc(apiSummary, handlers.SummaryHandler)
 

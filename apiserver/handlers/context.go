@@ -3,6 +3,7 @@ package handlers
 import (
 	"challenges-leontaolong/apiserver/models/messages"
 	"challenges-leontaolong/apiserver/models/users"
+	"challenges-leontaolong/apiserver/notification"
 	"challenges-leontaolong/apiserver/sessions"
 )
 
@@ -13,4 +14,5 @@ type Context struct {
 	SessionStore sessions.Store
 	UserStore    users.Store
 	MessageStore messages.Store
+	Notifier     *notification.Notifier
 }

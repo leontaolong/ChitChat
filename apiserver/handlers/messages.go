@@ -8,6 +8,10 @@ import (
 	"net/http"
 	"path"
 	"strconv"
+
+	"challenges-leontaolong/apiserver/notification"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -43,7 +47,6 @@ func (ctx *Context) ChannelsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "invalid JSON", http.StatusBadRequest)
 			return
 		}
-
 		channel, err := ctx.MessageStore.InsertChannel(newChannel, state.User.ID)
 		if err != nil {
 			http.Error(w, "error inserting new channel: "+err.Error(), http.StatusInternalServerError)
@@ -54,6 +57,10 @@ func (ctx *Context) ChannelsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "error adding creator to members: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
+		ctx.Notifier.Notify(&notification.Event{
+			Type: notification.NewChannelCreated,
+			Prop: channel,
+		})
 		// write to the new channel object the client
 		encoder.Encode(channel)
 	}
@@ -133,7 +140,10 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "error updating channel info: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		// write all messages to the client
+		ctx.Notifier.Notify(&notification.Event{
+			Type: notification.ChannelUpdated,
+			Prop: channel,
+		})
 		w.Header().Add(headerContentType, contentTypeJSONUTF8)
 		encoder := json.NewEncoder(w)
 		encoder.Encode(channel)
@@ -143,11 +153,19 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "deleting unauthorized: only creator of the channel can perform deletion", http.StatusBadRequest)
 			return
 		}
-		err := ctx.MessageStore.DeleteChannel(channel)
-		if err != nil {
-			http.Error(w, "error deleting channel: "+err.Error(), http.StatusInternalServerError)
+		err1, err2 := ctx.MessageStore.DeleteChannel(channel)
+		if err1 != nil {
+			http.Error(w, "error deleting all messages in the channel: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
+		if err2 != nil {
+			http.Error(w, "error deleting the channel: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		ctx.Notifier.Notify(&notification.Event{
+			Type: notification.ChannelDeleted,
+			Prop: channel,
+		})
 		w.Write([]byte("delete successful!"))
 
 	case "LINK":
@@ -157,6 +175,10 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error adding member: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
+			ctx.Notifier.Notify(&notification.Event{
+				Type: notification.UserJoinedChannel,
+				Prop: state.User,
+			})
 			w.Write([]byte("link current user successful!"))
 		} else {
 			if channel.CreatorID != state.User.ID { // if the user is not the creator of the given channel
@@ -173,6 +195,15 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error adding member: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
+			user, err := ctx.UserStore.GetByID(users.UserID(usrID))
+			if err != nil {
+				http.Error(w, "error getting user object with the given ID: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			ctx.Notifier.Notify(&notification.Event{
+				Type: notification.UserJoinedChannel,
+				Prop: user,
+			})
 			w.Write([]byte("link user successful!"))
 		}
 
@@ -183,6 +214,10 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error removing member: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
+			ctx.Notifier.Notify(&notification.Event{
+				Type: notification.UserLeftChannel,
+				Prop: state.User,
+			})
 			w.Write([]byte("unlink current user successful!"))
 		} else {
 			if channel.CreatorID != state.User.ID { // if the user is not the creator of the given channel
@@ -199,12 +234,21 @@ func (ctx *Context) SpecificChannelHandler(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "error removing member: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
+			user, err := ctx.UserStore.GetByID(users.UserID(usrID))
+			if err != nil {
+				http.Error(w, "error getting user object with the given ID: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			ctx.Notifier.Notify(&notification.Event{
+				Type: notification.UserLeftChannel,
+				Prop: user,
+			})
 			w.Write([]byte("unlink user successful!"))
 		}
 	}
 }
 
-//MessagesHandler handlea all requests made to the /v1/messages path
+//MessagesHandler handles all requests made to the /v1/messages path
 func (ctx *Context) MessagesHandler(w http.ResponseWriter, r *http.Request) {
 	state := &SessionState{}
 	_, err := sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
@@ -226,7 +270,10 @@ func (ctx *Context) MessagesHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "error inserting new message: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-
+		ctx.Notifier.Notify(&notification.Event{
+			Type: notification.NewMessagePosted,
+			Prop: message,
+		})
 		// write to the new message object the client
 		w.Header().Add(headerContentType, contentTypeJSONUTF8)
 		encoder := json.NewEncoder(w)
@@ -270,7 +317,11 @@ func (ctx *Context) SpecificMessageHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "error updating message info: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		// write all messages to the client
+		ctx.Notifier.Notify(&notification.Event{
+			Type: notification.MessageUpdated,
+			Prop: message,
+		})
+		// write updated message to the client
 		w.Header().Add(headerContentType, contentTypeJSONUTF8)
 		encoder := json.NewEncoder(w)
 		encoder.Encode(message)
@@ -285,6 +336,31 @@ func (ctx *Context) SpecificMessageHandler(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "error deleting message: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
+		ctx.Notifier.Notify(&notification.Event{
+			Type: notification.MessageDeleted,
+			Prop: message,
+		})
 		w.Write([]byte("delete successful!"))
 	}
+}
+
+//WebSocketUgradeHandler upgrades a http connection to websocket connection
+func (ctx *Context) WebSocketUgradeHandler(w http.ResponseWriter, r *http.Request) {
+	// make sure user is authenticated
+	state := &SessionState{}
+	_, err := sessions.GetState(r, ctx.SessionKey, ctx.SessionStore, state)
+	if err != nil {
+		http.Error(w, "error getting session state: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool { return true },
+	}
+	// Upgrade initial GET request to a websocket
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		http.Error(w, "error upgrading to websocket connection: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	ctx.Notifier.AddClient(ws)
 }
