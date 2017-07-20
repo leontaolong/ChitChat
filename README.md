@@ -8,4 +8,5 @@
 + Deployed the go and Node servers and web client using Docker and AWS EC2 with registered domain and certs
 
 ## Architecture Diagram
+![alt text](https://raw.githubusercontent.com/leontaolong/ChitChat/master/architecture.jpg)
 
