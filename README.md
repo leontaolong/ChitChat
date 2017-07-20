@@ -1,7 +1,11 @@
-# INFO 344 Challenges
+# ChitChat Web Service Development
 
-This repo was created for you by GitHub Classroom. **DO NOT FORK THIS REPO INTO YOUR OWN ACCOUNT!** It is already private. Only you and the teaching team can see the code in this repo. Please make all of your commits to branches in this repo.
+## Project Overview
++ Built both API Server and Web Client for a chat App using Golang, React.js, MongoDB, Redis, and MDL 
++ Implemented user login with HTTPS authentication, CORS middleware, 48 API handlers, credential and session encryption with bcrypt and hmac
++ Modelled and trained a NPL chatbot using Wit.ai and created a Node.js microservice that handles users’ chat-related questions
++ Enabled websocket 2.0 for real-time notification with Concurrency using goroutine, go channel, and Mutex Lock
++ Deployed the go and Node servers and web client using Docker and AWS EC2 with registered domain and certs
 
-Clone this repo to your development machine, and for each assignment, create a new branch, as directed in the challenge description. Make all commits for a given challenge only to that challenge branch, and push that branch up to GitHub. When you are finished with challenge, [create a GitHub Pull Request](https://help.github.com/articles/creating-a-pull-request/), asking to merge all commits from your challenge branch back into the `master` branch. We will use that pull request to provide detailed inline feedback on your code.
+## Architecture Diagram
 
-Note that you can still add commits to the branch after you create the pull request, and those new commits will be automatically added to the pull request as long as it's still open.
